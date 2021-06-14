@@ -444,9 +444,9 @@ class HomePage1 extends StatelessWidget{
           children: [
             createStrategyCard(context, strategistsList[6]['name'], strategistsList[6]['description'], strategistsList[6]['image'], strategistsList[6]['content']),
             SizedBox(width: MediaQuery.of(context).size.width * 0.04),
-            createStrategyCard(context, strategistsList[7]['name'], strategistsList[7]['description'], null, null),
+            createStrategyCard(context, strategistsList[7]['name'], strategistsList[7]['description'], '', ''),
             SizedBox(width: MediaQuery.of(context).size.width * 0.04),
-            createStrategyCard(context, strategistsList[8]['name'], strategistsList[7]['description'], null, null),
+            createStrategyCard(context, strategistsList[8]['name'], strategistsList[7]['description'], '', ''),
           ],
         ),
 
