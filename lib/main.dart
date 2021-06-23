@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:smd_investments_website/views/home.dart';
-import 'package:smd_investments_website/views/about.dart';
-import 'package:smd_investments_website/views/principles.dart';
+import 'package:smd_investments_website/views/views.dart';
 
 void main() {
   runApp(MyApp());
@@ -15,14 +13,12 @@ class MyApp extends StatelessWidget {
       title: 'Kua Capital',
       routes: {
         '/home': (context) => HomePage(),
-        '/about' : (context) => AboutUsPage(),
+        '/about': (context) => AboutUsPage(),
         '/principles': (context) => PrinciplesPage(),
       },
       home: Theme(
         data: Theme.of(context).copyWith(
-          accentColor: Colors.lightBlue,
-          primaryColor: Colors.lightBlue
-        ),
+            accentColor: Colors.lightBlue, primaryColor: Colors.lightBlue),
         child: Builder(
           builder: (context) => HomePage(),
         ),

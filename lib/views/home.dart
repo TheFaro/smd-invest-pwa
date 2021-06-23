@@ -2,83 +2,32 @@ import 'dart:core';
 
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 //import 'home1.dart';
 import 'package:smd_investments_website/readers/readers.dart';
 import 'package:smd_investments_website/models/models.dart';
 
-class HomePage extends StatefulWidget{
-
+class HomePage extends StatefulWidget {
   @override
   HomePageState createState() => new HomePageState();
 }
 
-class HomePageState extends State<HomePage>{
-
+class HomePageState extends State<HomePage> {
   // defining constants
-  final strategistsList = [
-    {
-      'name': 'Distressed Value Assets Portfolio',
-      'description': 'We seek to find value in distress value Assets that have been ignored by the market...',
-      'image': 'assets/banner/dandelion.jpg',
-      'content': 'We hold 12 positions across 5 sectors. We are bullish on oil. Since mid 2020, oil has performed better than most sectors. The reason we decided to get exposure on oil is because the sectore has been distressed for a long duration and multiple oil companies have experienced bankruptcy. The bankruptcy was accelerated by the closure/shut down due to COVID-19. During this period, we decide to seek exposure on good oil related businesses since only resilient/good companies are posed to survive and be operational.'
-    },
-    {
-      'name': 'Emerging Macro Trends Portfolio',
-      'description': 'We seek to gain exposure to potential future disruptors. Especially in technology, finance, transportation, pharmacy and bio-tech...',
-      'image': 'assets/banner/banner_image.jpg',
-      'content': 'Crypto currency is themed the future of finance. Removing the middleman through decentralization and public ledgers. For us it\'s another asset to grow our fund. Risky for sure, but what is risk? ? We have seen multiple euphoric booms and bursts in a short space of time since inception. After the Tulip like euphoria that ended in a burst in 2018, we decided to acquire a portfolio of cryptocurrencies and held them. The wait was painful, and we doubted ourselves nonstop since it\'s a new asset,so survival is not guaranteed. Recently they have done well growing at a 7x multiple.'
-    },
-    {
-      'name': 'Defensive Investment Portfolio',
-      'description': 'We seek to gain alpha on the Dow Jones index through the selection of only the strong companies...',
-      'image': 'assets/banner/lights.jpg',
-      'content': 'Our first 100% systematic investment approach is the popular trend following. We use trend following rules to identify stocks/assets to build our defensive portfolio. Our current exposure and the portfolio have been averaging 1.8% growth returns monthly with lowest maximum drawdown compare to our Buy & Hold Index.'
-    },
-    {
-      'name': 'Risk Premium Portfolio',
-      'description': 'We seek to gain alpha through harvesting risk premium through employing the VIX and the SnP 500...',
-      'image': 'assets/banner/sunset.jpg',
-      'content': 'We harvest the S&P 500 Volatility premium systematically. Our approach makes use of the CBOE Volatility index (VIX) (the fear gauge) and the S&P 500 index to determine to go long/short on volatility. We employ ETF\'s (VXX and SVXY) to express our view on volatility premium. This approach does great during high volatile periods (per our backtest) thus a great strategy to hedge our fund during crises periods or irrational fear.'
-    },
-    {
-      'name': 'Industrial Sector Rotation Portfolio',
-      'description': 'We seek to gain exposure to the industrial sector that is in current Economic view...',
-      'image': 'assets/banner/guy.jpg',
-      'content': 'Consumer spending is highly correlated to the business cycle. Therefore, we have designed this systematic portfolio to take advantage of this shift in consumer spending. This systematic investment portfolio ranks, selects and invest in Industrial Sector with low volatility. If none of the sectors are selected especially during a bear market, the capital is fully invested in USA government treasuries (tactical asset allocation). This portfolio is expose to only the main American industrial sectors, which are: Consumer Discretionary, Financials, Technology, Health Care, Communications, Utilities Consumer Staples, Real Estate, Materials, Industrial and Energy.'
-    },
-    {
-      'name': 'All Weather Portfolio',
-      'description': 'We seek to preserve cash buying power Against inflation as we wait for buying opportunity...',
-      'image': 'assets/banner/dandelion.jpg',
-      'content': 'The main aim of this strategy is preservation of funds/cash. it is not designed to beat the market but inflation. Since it is exposed to both the stock market and the USA Government bonds, the returns are the average of both. The funds are reserved opportunities the market presents now and again. IEF, SPY and Cash are the dominant assets in this portfolio.'
-    },
-    {
-      'name': 'Multi Currency Portfolio',
-      'description': 'We seek exposure to currency Exchange rate market and capture macro trends...',
-      'image': 'assets/banner/banner_image.jpg',
-      'content': 'We have developed a Long/Short proprietary systematic currency momentum investment strategy. We only buy or sell currency that have the potential to gain in returns in the nearest future. This strategy proved to be able to harvest the COVID driven momentum in March and April 2020. We decided to pause the strategy and reformulate it, back-test and conduct optimization to take advantage of persistent low volatile periods in the market.'
-    },
-    {
-      'name': 'Dividend Legacy Portfolio',
-      'description': 'Coming soon...',
-    },
-    {
-      'name': 'Southern African Portfolio',
-      'description': 'Coming soon...'
-    }
-  ];
 
   final teamList = [
     {
       'name': 'Mr Samkeliso Mpendulo Dlamini',
       'position': 'Founder and CEO, Investment Strategist',
-      'qualification': 'BSc in Science, Masters in Medicinal Chemistry and PhD Candidate Medicinal Chemistry',
+      'qualification':
+          'BSc in Science, Masters in Medicinal Chemistry and PhD Candidate Medicinal Chemistry',
       'image': 'assets/banner/user.png',
       'linked': 'assets/banner/linkedin.png'
     },
     {
       'name': 'Mr Fanelesibonge Phiwokuhle Malaza',
-      'position': 'Programmer, Architecture and Data Scientist Manager',
+      'position': 'Programmer, Architect and Data Scientist',
       'qualification': 'BSc Science in Physics and Computer Science',
       'image': 'assets/banner/user.png',
       'linked': 'assets/banner/linkedin.png'
@@ -102,6 +51,10 @@ class HomePageState extends State<HomePage>{
   bool isHovering3 = false;
   bool isHovering4 = false;
   bool isHovering5 = false;
+  bool strategistsMore = false;
+
+  // for theme
+  bool darkTheme = false;
 
   // readers
   InvestingRssReader investingRss = new InvestingRssReader();
@@ -109,115 +62,147 @@ class HomePageState extends State<HomePage>{
 
   // get rss feed data
 
+  // check theme selection
+  void checkThemeSelection() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool? res = prefs.getBool('theme_selection');
+
+    if (res != null) {
+      setState(() {
+        darkTheme = res;
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    checkThemeSelection();
+    DateFormat dateFormat = new DateFormat.Hm();
+    DateTime now = DateTime.now();
+    DateTime light = dateFormat.parse("06:00");
+    light =
+        new DateTime(now.year, now.month, now.day, light.hour, light.minute);
+    DateTime dark = dateFormat.parse("20:00");
+    dark = new DateTime(now.year, now.month, now.day, dark.hour, dark.minute);
+
+    if (now.isAfter(dark)) {
+      this.darkTheme = true;
+    } else if (now.isAfter(light)) {
+      this.darkTheme = false;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text('Home', style: TextStyle(fontFamily: 'Trebuchet MS', fontWeight: FontWeight.w600)),
-            IconButton(
-              icon: Icon(Icons.search),
-              color: Colors.white,
-              iconSize: 20,
-              onPressed: () => null,
-            ),
-          ],
-        ),
-        backgroundColor: Colors.lightBlue,
+    return Theme(
+      data: Theme.of(context).copyWith(
+        scaffoldBackgroundColor: darkTheme ? Colors.black : null,
+        accentColor: darkTheme ? Color(0xFFD1A84E) : Colors.lightBlue[700],
+        canvasColor: darkTheme ? Colors.black : Colors.white,
       ),
-      drawer: Drawer(
-        child: ListView(
-          children: [
-            MaterialButton(
-              child: Text('Home'),
-              color: Colors.white,
-              textColor: Colors.black,
-              onPressed: () => Navigator.pushReplacementNamed(context, '/home'),
-              padding: EdgeInsets.all(35.0),
+      child: Builder(
+        builder: (context) => Scaffold(
+          appBar: AppBar(
+            title: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('Home',
+                    style: TextStyle(
+                      fontFamily: 'MontSerrat',
+                      fontWeight: FontWeight.w900,
+                      color: darkTheme ? Color(0xffd1a84e) : Colors.white,
+                    )),
+                IconButton(
+                  icon: Icon(Icons.search),
+                  color: darkTheme ? Color(0xffD1A84E) : Colors.white,
+                  iconSize: 20,
+                  onPressed: () => null,
+                ),
+              ],
             ),
-            MaterialButton(
-              child: Text('About Us'),
-              color: Colors.white,
-              textColor: Colors.black,
-              onPressed: () => Navigator.pushReplacementNamed(context, '/about'),
-              padding: EdgeInsets.all(35.0),
+            backgroundColor: darkTheme ? Colors.black : Colors.lightBlue,
+            iconTheme: IconThemeData(
+              color: darkTheme ? Color(0xffd1a84e) : Colors.white,
             ),
-            MaterialButton(
-              child: Text('Principles & Culture'),
-              color: Colors.white,
-              textColor: Colors.black,
-              onPressed: () => Navigator.pushReplacementNamed(context, '/principles'),
-              padding: EdgeInsets.all(35.0),
-            ),
-          ]
-        ),
-      ),
-      body: SafeArea(
-        child: LayoutBuilder(
-          builder: (BuildContext context, BoxConstraints constraints){
-            Widget? banner;
-            Widget? strategistsTable;
-            Widget? news;
-            Widget? contacts;
-            double? strategyFont;
-            double width = MediaQuery.of(context).size.width;
-            double height = MediaQuery.of(context).size.height;
-            bool mobile;
+          ),
+          drawer: Drawer(
+            child: ListView(children: [
+              MaterialButton(
+                child: Text('Home'),
+                color: darkTheme ? Color(0xffD1A84E) : Colors.white,
+                textColor: Colors.black,
+                onPressed: () =>
+                    Navigator.pushReplacementNamed(context, '/home'),
+                padding: EdgeInsets.all(35.0),
+              ),
+              MaterialButton(
+                child: Text('About Us'),
+                color: darkTheme ? Color(0xffD1A84E) : Colors.white,
+                textColor: Colors.black,
+                onPressed: () => Navigator.pushReplacementNamed(
+                    context, '/about',
+                    arguments: this.darkTheme),
+                padding: EdgeInsets.all(35.0),
+              ),
+              MaterialButton(
+                child: Text('Principles & Culture'),
+                color: darkTheme ? Color(0xffD1A84E) : Colors.white,
+                textColor: Colors.black,
+                onPressed: () =>
+                    Navigator.pushReplacementNamed(context, '/principles'),
+                padding: EdgeInsets.all(35.0),
+              ),
+              MaterialButton(
+                child: darkTheme ? Text('Light Mode') : Text('Dark Mode'),
+                color: darkTheme ? Color(0xffD1A84E) : Colors.white,
+                textColor: Colors.black,
+                onPressed: () {
+                  setState(() {
+                    darkTheme = !darkTheme;
+                  });
+                },
+                padding: const EdgeInsets.all(35),
+              ),
+            ]),
+          ),
+          body: SafeArea(
+            child: LayoutBuilder(
+                builder: (BuildContext context, BoxConstraints constraints) {
+              Widget? banner;
+              Widget? strategistsTable;
+              Widget? news;
+              Widget? contacts;
+              Widget? team;
+              Widget? philosophy;
+              double? strategyFont;
+              double width = MediaQuery.of(context).size.width;
+              double height = MediaQuery.of(context).size.height;
+              bool mobile;
 
-            if(constraints.maxWidth < 600){
-              // mobile view definitions
-              // banner
-              banner = CarouselSlider(
-                items: [
-                  // 1st item
-                  Stack(
-                    children: [
-                      Container(
-                          margin: EdgeInsets.all(0.0),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(0.0),
-                            image: DecorationImage(
-                              image: AssetImage('assets/banner/banner_image.jpg'),
-                              fit: BoxFit.cover,
-                            ),
-                          )
-                      ),
-                      Container(color: Color.fromRGBO(0, 0, 0, 0.3)),
-                      Positioned(
-                        top: 75,
-                        left: 30,
-                        child: Container(
-                          width: MediaQuery.of(context).size.width * 0.7,
-                          child: Text(
-                            'SMD Capital is a data driven investment hedge fund. We employ proprietary models to capture returns',
-                            style: TextStyle(
-                              fontFamily: 'Trebuchet MS',
-                              color: Colors.white,
-                              fontWeight: FontWeight.w700,
-                              fontSize: 30,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+              Color textColor = darkTheme ? Color(0xffD1A84E) : Colors.black;
+              Color color = Color(0xffD1A84E);
+              String textFont = 'Montserrat';
 
-                  // 2nd item
-                  Stack(
+              if (constraints.maxWidth < 800) {
+                // mobile view definitions
+                // banner
+                banner = CarouselSlider(
+                  items: [
+                    // 1st item
+                    Stack(
                       children: [
                         Container(
-                          margin: EdgeInsets.all(0.0),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(0.0),
-                            image: DecorationImage(
-                              image: AssetImage('assets/banner/dandelion.jpg'),
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        ),
+                            margin: EdgeInsets.all(0.0),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(0.0),
+                              image: DecorationImage(
+                                image: AssetImage(
+                                    'assets/banner/banner_image.jpg'),
+                                fit: BoxFit.cover,
+                              ),
+                            )),
                         Container(color: Color.fromRGBO(0, 0, 0, 0.3)),
                         Positioned(
                           top: 75,
@@ -225,28 +210,27 @@ class HomePageState extends State<HomePage>{
                           child: Container(
                             width: MediaQuery.of(context).size.width * 0.7,
                             child: Text(
-                              'Our legacy investment strategies are non correlated and capitalize on Macro themes, Volatility, Distressed Assets, Risk Premium, Sector Rotation, Value and Growth',
+                              'SMD Capital is a data driven investment hedge fund. We employ proprietary models to capture returns',
                               style: TextStyle(
-                                fontFamily: 'Trebuchet MS',
+                                fontFamily: textFont,
                                 color: Colors.white,
                                 fontWeight: FontWeight.w700,
-                                fontSize: 27,
+                                fontSize: 30,
                               ),
                             ),
                           ),
                         ),
-                      ]
-                  ),
+                      ],
+                    ),
 
-                  // 3rd item
-                  Stack(
-                    children: [
+                    // 2nd item
+                    Stack(children: [
                       Container(
                         margin: EdgeInsets.all(0.0),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(0.0),
                           image: DecorationImage(
-                            image: AssetImage('assets/banner/guy.jpg'),
+                            image: AssetImage('assets/banner/dandelion.jpg'),
                             fit: BoxFit.cover,
                           ),
                         ),
@@ -258,61 +242,27 @@ class HomePageState extends State<HomePage>{
                         child: Container(
                           width: MediaQuery.of(context).size.width * 0.7,
                           child: Text(
-                            'Our mission is to protect wealth and a gradual organic growth of assets, leveraging compound interest',
+                            'Our legacy investment strategies are non correlated and capitalize on Macro themes, Volatility, Distressed Assets, Risk Premium, Sector Rotation, Value and Growth',
                             style: TextStyle(
-                              fontFamily: 'Trebuchet MS',
+                              fontFamily: textFont,
                               color: Colors.white,
                               fontWeight: FontWeight.w700,
-                              fontSize: 30,
+                              fontSize: 27,
                             ),
                           ),
                         ),
                       ),
-                    ],
-                  ),
+                    ]),
 
-                  // 4th item
-                  Stack(
-                    children: [
-                      Container(
-                        margin: EdgeInsets.all(0.0),
-                        decoration: BoxDecoration(
-                          image: DecorationImage(
-                              image: AssetImage('assets/banner/lights.jpg'),
-                              fit: BoxFit.cover,
-                              colorFilter: ColorFilter.mode(Colors.black.withOpacity(0.7), BlendMode.dstATop)
-                          ),
-                        ),
-                      ),
-                      Container(color: Color.fromRGBO(0, 0, 0, 0.3)),
-                      Positioned(
-                        top: 75,
-                        left: 30,
-                        child: Container(
-                          width: MediaQuery.of(context).size.width * 0.7,
-                          child: Text(
-                            'Our Foundation is INTEGRITY \nOur Strength is our PEOPLE \nOur Style is TEAMWORK \nOur Goal is EXCELLENCE',
-                            style: TextStyle(
-                              fontFamily: 'Trebuchet MS',
-                              color: Colors.white,
-                              fontWeight: FontWeight.w700,
-                              fontSize: 23,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  // 5th item
-                  Stack(
+                    // 3rd item
+                    Stack(
                       children: [
                         Container(
                           margin: EdgeInsets.all(0.0),
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(0.0),
                             image: DecorationImage(
-                              image: AssetImage('assets/banner/sunset.jpg'),
+                              image: AssetImage('assets/banner/guy.jpg'),
                               fit: BoxFit.cover,
                             ),
                           ),
@@ -324,576 +274,599 @@ class HomePageState extends State<HomePage>{
                           child: Container(
                             width: MediaQuery.of(context).size.width * 0.7,
                             child: Text(
-                              'We have skin in the game. We own a larger percentage of all the portfolio\'s',
+                              'Our mission is to protect wealth and a gradual organic growth of assets, leveraging compound interest',
                               style: TextStyle(
-                                fontFamily: 'Trebuchet MS',
+                                fontFamily: textFont,
                                 color: Colors.white,
                                 fontWeight: FontWeight.w700,
-                                fontSize: 27,
+                                fontSize: 30,
                               ),
                             ),
                           ),
                         ),
-                      ]
-                  ),
-                ],
-                options: CarouselOptions(
-                  height: MediaQuery.of(context).size.height * 0.6,
-                  enlargeCenterPage: true,
-                  autoPlay: true,
-                  aspectRatio: 16/9,
-                  autoPlayCurve: Curves.fastOutSlowIn,
-                  enableInfiniteScroll: true,
-                  autoPlayAnimationDuration: Duration(milliseconds: 800),
-                  viewportFraction: 1,
-                ),
-              );
-              strategyFont = 17;
-              mobile = true;
+                      ],
+                    ),
 
-              // strategists table
-              strategistsTable = ListView(
-                shrinkWrap: true,
-                children: <Widget>[
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
+                    // 4th item
+                    Stack(
+                      children: [
+                        Container(
+                          margin: EdgeInsets.all(0.0),
+                          decoration: BoxDecoration(
+                            image: DecorationImage(
+                                image: AssetImage('assets/banner/lights.jpg'),
+                                fit: BoxFit.cover,
+                                colorFilter: ColorFilter.mode(
+                                    Colors.black.withOpacity(0.7),
+                                    BlendMode.dstATop)),
+                          ),
+                        ),
+                        Container(color: Color.fromRGBO(0, 0, 0, 0.3)),
+                        Positioned(
+                          top: 75,
+                          left: 30,
+                          child: Container(
+                            width: MediaQuery.of(context).size.width * 0.7,
+                            child: Text(
+                              'Our Foundation is INTEGRITY \nOur Strength is our PEOPLE \nOur Style is TEAMWORK \nOur Goal is EXCELLENCE',
+                              style: TextStyle(
+                                fontFamily: textFont,
+                                color: Colors.white,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 23,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    // 5th item
+                    Stack(children: [
+                      Container(
+                        margin: EdgeInsets.all(0.0),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(0.0),
+                          image: DecorationImage(
+                            image: AssetImage('assets/banner/sunset.jpg'),
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+                      Container(color: Color.fromRGBO(0, 0, 0, 0.3)),
+                      Positioned(
+                        top: 75,
+                        left: 30,
+                        child: Container(
+                          width: MediaQuery.of(context).size.width * 0.7,
+                          child: Text(
+                            'We have skin in the game. We own a larger percentage of all the portfolio\'s',
+                            style: TextStyle(
+                              fontFamily: textFont,
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 27,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ]),
+                  ],
+                  options: CarouselOptions(
+                    height: MediaQuery.of(context).size.height * 0.6,
+                    enlargeCenterPage: true,
+                    autoPlay: true,
+                    aspectRatio: 16 / 9,
+                    autoPlayCurve: Curves.fastOutSlowIn,
+                    enableInfiniteScroll: true,
+                    autoPlayAnimationDuration: Duration(milliseconds: 800),
+                    viewportFraction: 1,
+                  ),
+                );
+                strategyFont = 17;
+                mobile = true;
+
+                // strategists table
+                strategistsTable = ListView(
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  children: <Widget>[
+                    Row(mainAxisSize: MainAxisSize.min, children: <Widget>[
                       Container(
                         width: width * 0.25,
                         padding: const EdgeInsets.all(7),
-                        child: Text('Porfolio', textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Trebuchet MS')),
+                        child: Text('Portfolio',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontFamily: textFont,
+                              color: textColor,
+                            )),
                       ),
                       Container(
                         width: width * 0.25,
                         padding: const EdgeInsets.all(7),
-                        child: Text('Ticker', textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Trebuchet MS')),
+                        child: Text(
+                          'Ticker',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontFamily: textFont,
+                            color: textColor,
+                          ),
+                        ),
                       ),
                       Container(
                         width: width * 0.25,
                         padding: const EdgeInsets.all(7),
-                        child: Text('% Exposure', textAlign: TextAlign.center, style:TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Trebuchet MS')),
+                        child: Text('% Exposure',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontFamily: textFont,
+                              color: textColor,
+                            )),
                       ),
                       Container(
                         width: width * 0.25,
                         padding: const EdgeInsets.all(7),
-                        child: Text('Returns (YoY)', textAlign: TextAlign.center, style:TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Trebuchet MS')),
+                        child: Text('Returns (YoY)',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontFamily: textFont,
+                              color: textColor,
+                            )),
                       ),
-                    ]
-                  ),
-                  Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        Container(
-                          width: width * 0.25,
-                          padding: const EdgeInsets.all(7),
-                          child: Text('Distressed Value Assets', textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Trebuchet MS')),
+                    ]),
+                    Row(mainAxisSize: MainAxisSize.min, children: <Widget>[
+                      Container(
+                        width: width * 0.25,
+                        padding: const EdgeInsets.all(7),
+                        child: Text('Distressed Value Assets',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontFamily: textFont,
+                              color: textColor,
+                            )),
+                      ),
+                      Container(
+                        width: width * 0.25,
+                        padding: const EdgeInsets.all(7),
+                        child: Text('DVAP',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontFamily: textFont,
+                              color: textColor,
+                            )),
+                      ),
+                      Container(
+                        width: width * 0.25,
+                        padding: const EdgeInsets.all(7),
+                        child: Text('28%',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontFamily: textFont,
+                              color: textColor,
+                            )),
+                      ),
+                      Container(
+                        width: width * 0.25,
+                        padding: const EdgeInsets.all(7),
+                        child: Text('28%',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontFamily: textFont,
+                              color: textColor,
+                            )),
+                      ),
+                    ]),
+                    Row(mainAxisSize: MainAxisSize.min, children: <Widget>[
+                      Container(
+                        width: width * 0.25,
+                        padding: const EdgeInsets.all(7),
+                        child: Text('Emerging Trends',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontFamily: textFont,
+                              color: textColor,
+                            )),
+                      ),
+                      Container(
+                        width: width * 0.25,
+                        padding: const EdgeInsets.all(7),
+                        child: Text('ETP',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontFamily: textFont,
+                              color: textColor,
+                            )),
+                      ),
+                      Container(
+                        width: width * 0.25,
+                        padding: const EdgeInsets.all(7),
+                        child: Text('26%',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontFamily: textFont,
+                              color: textColor,
+                            )),
+                      ),
+                      Container(
+                        width: width * 0.25,
+                        padding: const EdgeInsets.all(7),
+                        child: Text('20%',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontFamily: textFont,
+                              color: textColor,
+                            )),
+                      ),
+                    ]),
+                    Row(mainAxisSize: MainAxisSize.min, children: <Widget>[
+                      Container(
+                        width: width * 0.25,
+                        padding: const EdgeInsets.all(7),
+                        child: Text('Defensive Investing',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontFamily: textFont,
+                              color: textColor,
+                            )),
+                      ),
+                      Container(
+                        width: width * 0.25,
+                        padding: const EdgeInsets.all(7),
+                        child: Text('DIP',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontFamily: textFont,
+                              color: textColor,
+                            )),
+                      ),
+                      Container(
+                        width: width * 0.25,
+                        padding: const EdgeInsets.all(7),
+                        child: Text('10%',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontFamily: textFont,
+                              color: textColor,
+                            )),
+                      ),
+                      Container(
+                        width: width * 0.25,
+                        padding: const EdgeInsets.all(7),
+                        child: Text('13%',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontFamily: textFont,
+                              color: textColor,
+                            )),
+                      ),
+                    ]),
+                    Row(mainAxisSize: MainAxisSize.min, children: <Widget>[
+                      Container(
+                        width: width * 0.25,
+                        padding: const EdgeInsets.all(7),
+                        child: Text('Risk Premium',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontFamily: textFont,
+                              color: textColor,
+                            )),
+                      ),
+                      Container(
+                        width: width * 0.25,
+                        padding: const EdgeInsets.all(7),
+                        child: Text('RPP',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'Trebuchet MS',
+                              color: textColor,
+                            )),
+                      ),
+                      Container(
+                        width: width * 0.25,
+                        padding: const EdgeInsets.all(7),
+                        child: Text('5%',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontFamily: textFont,
+                              color: textColor,
+                            )),
+                      ),
+                      Container(
+                        width: width * 0.25,
+                        padding: const EdgeInsets.all(7),
+                        child: Text('12.36%',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontFamily: textFont,
+                              color: textColor,
+                            )),
+                      ),
+                    ]),
+                    Row(mainAxisSize: MainAxisSize.min, children: <Widget>[
+                      Container(
+                        width: width * 0.25,
+                        padding: const EdgeInsets.all(7),
+                        child: Text('Industrial Sector Rotation',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontFamily: textFont,
+                              color: textColor,
+                            )),
+                      ),
+                      Container(
+                        width: width * 0.25,
+                        padding: const EdgeInsets.all(7),
+                        child: Text('ISRP',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontFamily: textFont,
+                              color: textColor,
+                            )),
+                      ),
+                      Container(
+                        width: width * 0.25,
+                        padding: const EdgeInsets.all(7),
+                        child: Text('5%',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontFamily: textFont,
+                              color: textColor,
+                            )),
+                      ),
+                      Container(
+                        width: width * 0.25,
+                        padding: const EdgeInsets.all(7),
+                        child: Text('7.53%',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontFamily: textFont,
+                              color: textColor,
+                            )),
+                      ),
+                    ]),
+                    Row(mainAxisSize: MainAxisSize.min, children: <Widget>[
+                      Container(
+                        width: width * 0.25,
+                        padding: const EdgeInsets.all(7),
+                        child: Text('All Weather',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontFamily: textFont,
+                              color: textColor,
+                            )),
+                      ),
+                      Container(
+                        width: width * 0.25,
+                        padding: const EdgeInsets.all(7),
+                        child: Text('AWP',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontFamily: textFont,
+                              color: textColor,
+                            )),
+                      ),
+                      Container(
+                        width: width * 0.25,
+                        padding: const EdgeInsets.all(7),
+                        child: Text('10%',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontFamily: textFont,
+                              color: textColor,
+                            )),
+                      ),
+                      Container(
+                        width: width * 0.25,
+                        padding: const EdgeInsets.all(7),
+                        child: Text('2.05%',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontFamily: textFont,
+                              color: textColor,
+                            )),
+                      ),
+                    ]),
+                    Row(mainAxisSize: MainAxisSize.min, children: <Widget>[
+                      Container(
+                        width: width * 0.25,
+                        padding: const EdgeInsets.all(7),
+                        child: Text('Multiple Currencies',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontFamily: textFont,
+                              color: textColor,
+                            )),
+                      ),
+                      Container(
+                        width: width * 0.25,
+                        padding: const EdgeInsets.all(7),
+                        child: Text('MCP',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontFamily: textFont,
+                              color: textColor,
+                            )),
+                      ),
+                      Container(
+                        width: width * 0.25,
+                        padding: const EdgeInsets.all(7),
+                        child: Text('16%',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontFamily: textFont,
+                              color: textColor,
+                            )),
+                      ),
+                      Container(
+                        width: width * 0.25,
+                        padding: const EdgeInsets.all(7),
+                        child: Text('11%',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontFamily: textFont,
+                              color: textColor,
+                            )),
+                      ),
+                    ]),
+                    Container(
+                        decoration: BoxDecoration(
+                          color: darkTheme ? color : Colors.lightBlue[700],
                         ),
-                        Container(
-                          width: width * 0.25,
-                          padding: const EdgeInsets.all(7),
-                          child: Text('DVAP', textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Trebuchet MS')),
+                        width: width * 0.8,
+                        margin: EdgeInsets.only(
+                          top: 10,
+                          bottom: 10,
+                          left: 30,
+                          right: 30,
                         ),
-                        Container(
-                          width: width * 0.25,
-                          padding: const EdgeInsets.all(7),
-                          child: Text('28%', textAlign: TextAlign.center, style:TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Trebuchet MS')),
-                        ),
-                        Container(
-                          width: width * 0.25,
-                          padding: const EdgeInsets.all(7),
-                          child: Text('28%', textAlign: TextAlign.center, style:TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Trebuchet MS')),
-                        ),
-                      ]
-                  ),
-                  Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        Container(
-                          width: width * 0.25,
-                          padding: const EdgeInsets.all(7),
-                          child: Text('Emerging Trends', textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Trebuchet MS')),
-                        ),
-                        Container(
-                          width: width * 0.25,
-                          padding: const EdgeInsets.all(7),
-                          child: Text('ETP', textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Trebuchet MS')),
-                        ),
-                        Container(
-                          width: width * 0.25,
-                          padding: const EdgeInsets.all(7),
-                          child: Text('26%', textAlign: TextAlign.center, style:TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Trebuchet MS')),
-                        ),
-                        Container(
-                          width: width * 0.25,
-                          padding: const EdgeInsets.all(7),
-                          child: Text('20%', textAlign: TextAlign.center, style:TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Trebuchet MS')),
-                        ),
-                      ]
-                  ),
-                  Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        Container(
-                          width: width * 0.25,
-                          padding: const EdgeInsets.all(7),
-                          child: Text('Defensive Investing', textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Trebuchet MS')),
-                        ),
-                        Container(
-                          width: width * 0.25,
-                          padding: const EdgeInsets.all(7),
-                          child: Text('DIP', textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Trebuchet MS')),
-                        ),
-                        Container(
-                          width: width * 0.25,
-                          padding: const EdgeInsets.all(7),
-                          child: Text('10%', textAlign: TextAlign.center, style:TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Trebuchet MS')),
-                        ),
-                        Container(
-                          width: width * 0.25,
-                          padding: const EdgeInsets.all(7),
-                          child: Text('13%', textAlign: TextAlign.center, style:TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Trebuchet MS')),
-                        ),
-                      ]
-                  ),
-                  Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        Container(
-                          width: width * 0.25,
-                          padding: const EdgeInsets.all(7),
-                          child: Text('Risk Premium', textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Trebuchet MS')),
-                        ),
-                        Container(
-                          width: width * 0.25,
-                          padding: const EdgeInsets.all(7),
-                          child: Text('RPP', textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Trebuchet MS')),
-                        ),
-                        Container(
-                          width: width * 0.25,
-                          padding: const EdgeInsets.all(7),
-                          child: Text('5%', textAlign: TextAlign.center, style:TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Trebuchet MS')),
-                        ),
-                        Container(
-                          width: width * 0.25,
-                          padding: const EdgeInsets.all(7),
-                          child: Text('12.36%', textAlign: TextAlign.center, style:TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Trebuchet MS')),
-                        ),
-                      ]
-                  ),
-                  Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        Container(
-                          width: width * 0.25,
-                          padding: const EdgeInsets.all(7),
-                          child: Text('Industrial Sector Rotation', textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Trebuchet MS')),
-                        ),
-                        Container(
-                          width: width * 0.25,
-                          padding: const EdgeInsets.all(7),
-                          child: Text('ISRP', textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Trebuchet MS')),
-                        ),
-                        Container(
-                          width: width * 0.25,
-                          padding: const EdgeInsets.all(7),
-                          child: Text('5%', textAlign: TextAlign.center, style:TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Trebuchet MS')),
-                        ),
-                        Container(
-                          width: width * 0.25,
-                          padding: const EdgeInsets.all(7),
-                          child: Text('7.53%', textAlign: TextAlign.center, style:TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Trebuchet MS')),
-                        ),
-                      ]
-                  ),
-                  Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        Container(
-                          width: width * 0.25,
-                          padding: const EdgeInsets.all(7),
-                          child: Text('All Weather', textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Trebuchet MS')),
-                        ),
-                        Container(
-                          width: width * 0.25,
-                          padding: const EdgeInsets.all(7),
-                          child: Text('AWP', textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Trebuchet MS')),
-                        ),
-                        Container(
-                          width: width * 0.25,
-                          padding: const EdgeInsets.all(7),
-                          child: Text('10%', textAlign: TextAlign.center, style:TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Trebuchet MS')),
-                        ),
-                        Container(
-                          width: width * 0.25,
-                          padding: const EdgeInsets.all(7),
-                          child: Text('2.05%', textAlign: TextAlign.center, style:TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Trebuchet MS')),
-                        ),
-                      ]
-                  ),
-                  Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        Container(
-                          width: width * 0.25,
-                          padding: const EdgeInsets.all(7),
-                          child: Text('Multiple Currencies', textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Trebuchet MS')),
-                        ),
-                        Container(
-                          width: width * 0.25,
-                          padding: const EdgeInsets.all(7),
-                          child: Text('MCP', textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Trebuchet MS')),
-                        ),
-                        Container(
-                          width: width * 0.25,
-                          padding: const EdgeInsets.all(7),
-                          child: Text('16%', textAlign: TextAlign.center, style:TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Trebuchet MS')),
-                        ),
-                        Container(
-                          width: width * 0.25,
-                          padding: const EdgeInsets.all(7),
-                          child: Text('11%', textAlign: TextAlign.center, style:TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Trebuchet MS')),
-                        ),
-                      ]
-                  ),
-                ],
-              );
-
-              // news
-              news = Container(
-                child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      FutureBuilder(
-                          future: investingRss.loadFeed('NEWS', 'All News'),
-                          builder: (context, snapshot){
-
-                            if(snapshot.hasData){
-                              Object obj = snapshot.data!;
-                              final list = checkType(obj);
-
-                              if(list is List<InvestingRssNews>){
-                                List<InvestingRssNews> items = list;
-
-                                return Column(
-                                  children: [
-                                    Card(
-                                      color: Color(0xffeeeeee),
-                                      child: Container(
-                                        width: width * 0.8,
-                                        child:Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            SizedBox(height: 12),
-                                            Text(
-                                              'All news',
-                                              textAlign: TextAlign.center,
-                                              style: TextStyle(
-                                                fontFamily: 'Trebuchet MS',
-                                                fontSize: 20,
-                                                color: Colors.black,
-                                              ),
-                                            ),
-                                            SizedBox(height: 12),
-                                            Container(
-                                              width :width * 0.8,
-                                              height: height * 0.6 * 0.25,
-                                              decoration: BoxDecoration(
-                                                image: DecorationImage(
-                                                  image: NetworkImage(items[0].enclosure.url),
-                                                  fit: BoxFit.cover,
-                                                ),
-                                              ),
-                                            ),
-                                            Padding(
-                                              padding: const EdgeInsets.only(
-                                                left: 8,
-                                                right: 8,
-                                                top: 10
-                                              ),
-                                              child: Text(
-                                                '${items[0].title}',
-                                                textAlign: TextAlign.center,
-                                                style: TextStyle(
-                                                  fontFamily: 'Trebuchet MS',
-                                                  fontSize: 15,
-                                                  color: Colors.black,
-                                                ),
-                                              ),
-                                            ),
-                                            Padding(
-                                              padding: const EdgeInsets.all(7),
-                                              child: Text(
-                                                'By: ${items[0].author} , at ${items[0].pubDate.toString().substring(0,16)}',
-                                                textAlign: TextAlign.center,
-                                                style: TextStyle(
-                                                  fontFamily: 'Trebuchet MS',
-                                                  fontSize: 13,
-                                                  color: Colors.black,
-                                                ),
-                                              ),
-                                            ),
-                                            Padding(
-                                              padding: const EdgeInsets.all(7),
-                                              child: InkWell(
-                                                onTap: () => null,
-                                                child: Text(
-                                                  '${items[0].link}',
-                                                  textAlign: TextAlign.center,
-                                                  style: TextStyle(
-                                                    fontFamily: 'Trebuchet MS',
-                                                    decoration: TextDecoration.underline,
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                            SizedBox(height: 12.0),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                    SizedBox(height: 12.0),
-                                    MaterialButton(
-                                      child: Text(
-                                        'See more',
-                                      ),
-                                      shape: StadiumBorder(),
-                                      textColor: Colors.white,
-                                      color: Colors.lightBlue[700],
-                                      padding: const EdgeInsets.only(
-                                        top: 13,
-                                        bottom: 13,
-                                        right: 30,
-                                        left: 30,
-                                      ),
-                                      onPressed: () => null, // go the new list view
-                                    ),
-                                    SizedBox(height: 12.0),
-                                  ],
-                                );
-                              }
-                            }else if(snapshot.hasError){
-                              return Text(
-                                '${snapshot.error}',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontFamily: 'roboto',
-                                  color: Colors.red,
-                                  fontSize: 20,
-                                ),
-                              );
+                        child: InkWell(
+                          onTap: () => null,
+                          onHover: (hovering) {
+                            if (hovering) {
+                              setState(() {
+                                strategistsMore = hovering;
+                              });
+                            } else {
+                              setState(() {
+                                strategistsMore = hovering;
+                              });
                             }
+                          },
+                          child: Container(
+                            padding: EdgeInsets.all(12.0),
+                            child: Text(
+                              'Learn more about Strategists',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontFamily: textFont,
+                                fontSize: 20,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ),
+                        )),
+                  ],
+                );
 
-                            return Center(
-                              child: CircularProgressIndicator(),
-                            );
-                          }
-                      ),
-                      FutureBuilder(
-                          future: investingRss.loadFeed('NEWS', 'Forex News'),
-                          builder: (context, snapshot){
+                // news
+                news = Container(
+                  child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        FutureBuilder(
+                            future: investingRss.loadFeed('NEWS', 'All News'),
+                            builder: (context, snapshot) {
+                              if (snapshot.hasData) {
+                                Object obj = snapshot.data!;
+                                final list = checkType(obj);
 
-                            if(snapshot.hasData){
-                              Object obj = snapshot.data!;
-                              final list = checkType(obj);
+                                if (list is List<InvestingRssNews>) {
+                                  List<InvestingRssNews> items = list;
 
-                              if(list is List<InvestingRssNews>){
-                                List<InvestingRssNews> items = list;
-
-                                return Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    Card(
-                                      color: Color(0xffeeeeee),
-                                      borderOnForeground: true,
-                                      child: Container(
-                                        width: width * 0.8,
-                                        child:Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            SizedBox(height: 12),
-                                            Text(
-                                              'Forex News',
-                                              textAlign: TextAlign.center,
-                                              style: TextStyle(
-                                                fontFamily: 'Trebuchet MS',
-                                                fontSize: 20,
-
-                                              ),
-                                            ),
-                                            SizedBox(height: 12.0),
-                                            Container(
-                                              width :width * 0.8,
-                                              height: height * 0.6 * 0.25,
-                                              decoration: BoxDecoration(
-                                                image: DecorationImage(
-                                                  image: NetworkImage(items[0].enclosure.url),
-                                                  fit: BoxFit.cover,
-                                                ),
-                                              ),
-                                            ),
-                                            Padding(
-                                              padding: const EdgeInsets.only(
-                                                left: 8,
-                                                right: 8,
-                                              ),
-                                              child: Text(
-                                                '${items[0].title}',
-                                                textAlign: TextAlign.center,
-                                                style: TextStyle(
-                                                  fontFamily: 'Trebuchet MS',
-                                                  fontSize: 15,
-                                                  color: Colors.black,
-                                                ),
-                                              ),
-                                            ),
-                                            Padding(
-                                              padding: const EdgeInsets.all(7),
-                                              child: Text(
-                                                'By: ${items[0].author} , at ${items[0].pubDate.toString().substring(0,16)}',
-                                                textAlign: TextAlign.center,
-                                                style: TextStyle(
-                                                  fontFamily: 'Trebuchet MS',
-                                                  fontSize: 13,
-                                                  color: Colors.black,
-                                                ),
-                                              ),
-                                            ),
-                                            Padding(
-                                              padding: const EdgeInsets.all(7),
-                                              child: InkWell(
-                                                onTap: () => null,
-                                                child: Text(
-                                                  '${items[0].link}',
-                                                  textAlign: TextAlign.center,
-                                                  style: TextStyle(
-                                                    fontFamily: 'Trebuchet MS',
-                                                    decoration: TextDecoration.underline,
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                            SizedBox(height: 12.0),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                    SizedBox(height: 12.0),
-                                    MaterialButton(
-                                      child: Text(
-                                        'See more',
-                                      ),
-                                      shape: StadiumBorder(),
-                                      textColor: Colors.white,
-                                      color: Colors.lightBlue[700],
-                                      padding: const EdgeInsets.only(
-                                        top: 13,
-                                        bottom: 13,
-                                        right: 30,
-                                        left: 30,
-                                      ),
-                                      onPressed: () => null, // go the new list view
-                                    ),
-                                    SizedBox(height: 12.0),
-                                  ],
-                                );
-                              }
-                            }else if(snapshot.hasError){
-                              return Text(
-                                '${snapshot.error}',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontFamily: 'roboto',
-                                  color: Colors.red,
-                                  fontSize: 20,
-                                ),
-                              );
-                            }
-
-                            return Center(
-                              child: CircularProgressIndicator(),
-                            );
-                          }
-                      ),
-                      FutureBuilder(
-                          future: investingRss.loadFeed('NEWS', 'Coronavirus News & Updates'),
-                          builder: (context, snapshot){
-
-                            if(snapshot.hasData){
-                              Object obj = snapshot.data!;
-                              final list = checkType(obj);
-
-                              if(list is List<InvestingRssNews>){
-                                List<InvestingRssNews> items = list;
-
-                                return Column(
+                                  return Column(
                                     children: [
                                       Card(
                                         color: Color(0xffeeeeee),
                                         child: Container(
                                           width: width * 0.8,
-                                          child:Column(
+                                          child: Column(
                                             mainAxisSize: MainAxisSize.min,
                                             children: [
                                               SizedBox(height: 12),
                                               Text(
-                                                'Coronavirus News & Updates',
+                                                'All news',
                                                 textAlign: TextAlign.center,
                                                 style: TextStyle(
-                                                  fontFamily: 'Trebuchet MS',
+                                                  fontFamily: textFont,
                                                   fontSize: 20,
-
+                                                  color: textColor,
                                                 ),
                                               ),
-                                              SizedBox(height: 12.0),
+                                              SizedBox(height: 12),
                                               Container(
-                                                width :width * 0.8,
+                                                width: width * 0.8,
                                                 height: height * 0.6 * 0.25,
                                                 decoration: BoxDecoration(
                                                   image: DecorationImage(
-                                                    image: NetworkImage(items[0].enclosure.url),
+                                                    image: NetworkImage(
+                                                        items[0].enclosure.url),
                                                     fit: BoxFit.cover,
                                                   ),
                                                 ),
                                               ),
                                               Padding(
                                                 padding: const EdgeInsets.only(
-                                                  left: 8,
-                                                  right: 8,
-                                                ),
+                                                    left: 8, right: 8, top: 10),
                                                 child: Text(
                                                   '${items[0].title}',
                                                   textAlign: TextAlign.center,
                                                   style: TextStyle(
-                                                    fontFamily: 'Trebuchet MS',
+                                                    fontFamily: textFont,
                                                     fontSize: 15,
-                                                    color: Colors.black,
+                                                    color: textColor,
                                                   ),
                                                 ),
                                               ),
                                               Padding(
-                                                padding: const EdgeInsets.all(7),
+                                                padding:
+                                                    const EdgeInsets.all(7),
                                                 child: Text(
-                                                  'By: ${items[0].author} , at ${items[0].pubDate.toString().substring(0,16)}',
+                                                  'By: ${items[0].author} , at ${items[0].pubDate.toString().substring(0, 16)}',
                                                   textAlign: TextAlign.center,
                                                   style: TextStyle(
-                                                    fontFamily: 'Trebuchet MS',
+                                                    fontFamily: textFont,
                                                     fontSize: 13,
-                                                    color: Colors.black,
+                                                    color: textColor,
                                                   ),
                                                 ),
                                               ),
                                               Padding(
-                                                padding: const EdgeInsets.all(7),
+                                                padding:
+                                                    const EdgeInsets.all(7),
                                                 child: InkWell(
                                                   onTap: () => null,
                                                   child: Text(
                                                     '${items[0].link}',
                                                     textAlign: TextAlign.center,
                                                     style: TextStyle(
-                                                      fontFamily: 'Trebuchet MS',
-                                                      decoration: TextDecoration.underline,
+                                                      fontFamily: textFont,
+                                                      color: textColor,
+                                                      decoration: TextDecoration
+                                                          .underline,
                                                     ),
                                                   ),
                                                 ),
@@ -909,75 +882,82 @@ class HomePageState extends State<HomePage>{
                                           'See more',
                                         ),
                                         shape: StadiumBorder(),
-                                        textColor: Colors.white,
-                                        color: Colors.lightBlue[700],
+                                        textColor: darkTheme
+                                            ? Colors.black
+                                            : Colors.white,
+                                        color: darkTheme
+                                            ? color
+                                            : Colors.lightBlue[700],
                                         padding: const EdgeInsets.only(
                                           top: 13,
                                           bottom: 13,
                                           right: 30,
                                           left: 30,
                                         ),
-                                        onPressed: () => null, // go the new list view
+                                        onPressed: () =>
+                                            null, // go the new list view
                                       ),
                                       SizedBox(height: 12.0),
-                                    ]
+                                    ],
+                                  );
+                                }
+                              } else if (snapshot.hasError) {
+                                return Text(
+                                  '${snapshot.error}',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontFamily: 'roboto',
+                                    color: Colors.red,
+                                    fontSize: 20,
+                                  ),
                                 );
                               }
-                            }else if(snapshot.hasError){
-                              return Text(
-                                '${snapshot.error}',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontFamily: 'roboto',
-                                  color: Colors.red,
-                                  fontSize: 20,
-                                ),
+
+                              return Center(
+                                child: CircularProgressIndicator(),
                               );
-                            }
+                            }),
+                        FutureBuilder(
+                            future: investingRss.loadFeed('NEWS', 'Forex News'),
+                            builder: (context, snapshot) {
+                              if (snapshot.hasData) {
+                                Object obj = snapshot.data!;
+                                final list = checkType(obj);
 
-                            return Center(
-                              child: CircularProgressIndicator(),
-                            );
-                          }
-                      ),
-                      FutureBuilder(
-                          future: investingRss.loadFeed('NEWS', 'Economy News'),
-                          builder: (context, snapshot){
+                                if (list is List<InvestingRssNews>) {
+                                  List<InvestingRssNews> items = list;
 
-                            if(snapshot.hasData){
-                              Object obj = snapshot.data!;
-                              final list = checkType(obj);
-
-                              if(list is List<InvestingRssNews>){
-                                List<InvestingRssNews> items = list;
-
-                                return Column(
+                                  return Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
                                     children: [
                                       Card(
                                         color: Color(0xffeeeeee),
                                         borderOnForeground: true,
                                         child: Container(
                                           width: width * 0.8,
-                                          child:Column(
+                                          child: Column(
                                             mainAxisSize: MainAxisSize.min,
                                             children: [
                                               SizedBox(height: 12),
                                               Text(
-                                                'Economy News',
+                                                'Forex News',
                                                 textAlign: TextAlign.center,
                                                 style: TextStyle(
-                                                  fontFamily: 'Trebuchet MS',
+                                                  fontFamily: textFont,
+                                                  color: textColor,
                                                   fontSize: 20,
-
                                                 ),
                                               ),
                                               SizedBox(height: 12.0),
                                               Container(
-                                                width :width * 0.8,
+                                                width: width * 0.8,
                                                 height: height * 0.6 * 0.25,
                                                 decoration: BoxDecoration(
                                                   image: DecorationImage(
-                                                    image: NetworkImage(items[0].enclosure.url),
+                                                    image: NetworkImage(
+                                                        items[0].enclosure.url),
                                                     fit: BoxFit.cover,
                                                   ),
                                                 ),
@@ -991,34 +971,38 @@ class HomePageState extends State<HomePage>{
                                                   '${items[0].title}',
                                                   textAlign: TextAlign.center,
                                                   style: TextStyle(
-                                                    fontFamily: 'Trebuchet MS',
+                                                    fontFamily: textFont,
                                                     fontSize: 15,
-                                                    color: Colors.black,
+                                                    color: textColor,
                                                   ),
                                                 ),
                                               ),
                                               Padding(
-                                                padding: const EdgeInsets.all(7),
+                                                padding:
+                                                    const EdgeInsets.all(7),
                                                 child: Text(
-                                                  'By: ${items[0].author} , at ${items[0].pubDate.toString().substring(0,16)}',
+                                                  'By: ${items[0].author} , at ${items[0].pubDate.toString().substring(0, 16)}',
                                                   textAlign: TextAlign.center,
                                                   style: TextStyle(
-                                                    fontFamily: 'Trebuchet MS',
+                                                    fontFamily: textFont,
                                                     fontSize: 13,
-                                                    color: Colors.black,
+                                                    color: textColor,
                                                   ),
                                                 ),
                                               ),
                                               Padding(
-                                                padding: const EdgeInsets.all(7),
+                                                padding:
+                                                    const EdgeInsets.all(7),
                                                 child: InkWell(
                                                   onTap: () => null,
                                                   child: Text(
                                                     '${items[0].link}',
                                                     textAlign: TextAlign.center,
                                                     style: TextStyle(
-                                                      fontFamily: 'Trebuchet MS',
-                                                      decoration: TextDecoration.underline,
+                                                      fontFamily: textFont,
+                                                      decoration: TextDecoration
+                                                          .underline,
+                                                      color: textColor,
                                                     ),
                                                   ),
                                                 ),
@@ -1028,289 +1012,747 @@ class HomePageState extends State<HomePage>{
                                           ),
                                         ),
                                       ),
-                                      SizedBox(height: 12),
+                                      SizedBox(height: 12.0),
                                       MaterialButton(
                                         child: Text(
                                           'See more',
                                         ),
                                         shape: StadiumBorder(),
-                                        textColor: Colors.white,
-                                        color: Colors.lightBlue[700],
+                                        textColor: darkTheme
+                                            ? Colors.black
+                                            : Colors.white,
+                                        color: darkTheme
+                                            ? color
+                                            : Colors.lightBlue[700],
                                         padding: const EdgeInsets.only(
                                           top: 13,
                                           bottom: 13,
                                           right: 30,
                                           left: 30,
                                         ),
-                                        onPressed: () => null, // go the new list view
+                                        onPressed: () =>
+                                            null, // go the new list view
                                       ),
-                                      SizedBox(height: 12)
-                                    ]
+                                      SizedBox(height: 12.0),
+                                    ],
+                                  );
+                                }
+                              } else if (snapshot.hasError) {
+                                return Text(
+                                  '${snapshot.error}',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontFamily: 'roboto',
+                                    color: Colors.red,
+                                    fontSize: 20,
+                                  ),
                                 );
                               }
-                            }else if(snapshot.hasError){
-                              return Text(
-                                '${snapshot.error}',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontFamily: 'roboto',
-                                  color: Colors.red,
-                                  fontSize: 20,
-                                ),
+
+                              return Center(
+                                child: CircularProgressIndicator(),
                               );
-                            }
+                            }),
+                        FutureBuilder(
+                            future: investingRss.loadFeed(
+                                'NEWS', 'Coronavirus News & Updates'),
+                            builder: (context, snapshot) {
+                              if (snapshot.hasData) {
+                                Object obj = snapshot.data!;
+                                final list = checkType(obj);
 
-                            return Center(
-                              child: CircularProgressIndicator(),
-                            );
-                          }
-                      ),
-                    ]
-                ),
-              );
+                                if (list is List<InvestingRssNews>) {
+                                  List<InvestingRssNews> items = list;
 
-              // contact us
-              contacts = Container(
-                width: MediaQuery.of(context).size.width,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      width: MediaQuery.of(context).size.width,
-                      height: 70,
-                      margin: const EdgeInsets.all(15.0),
-                      child: TextFormField(
-                        controller: name,
-                        style: TextStyle(
-                          fontFamily: 'Trebuchet MS',
-                          color: Colors.black,
-                        ),
-                        cursorColor: Colors.black,
-                        keyboardType: TextInputType.text,
-                        decoration: InputDecoration(
-                          hintText: 'Name',
-                          hintStyle: TextStyle(
-                            fontFamily: 'Trebuchet MS',
-                            color: Colors.black,
+                                  return Column(children: [
+                                    Card(
+                                      color: Color(0xffeeeeee),
+                                      child: Container(
+                                        width: width * 0.8,
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            SizedBox(height: 12),
+                                            Text(
+                                              'Coronavirus News & Updates',
+                                              textAlign: TextAlign.center,
+                                              style: TextStyle(
+                                                fontFamily: textFont,
+                                                fontSize: 20,
+                                                color: textColor,
+                                              ),
+                                            ),
+                                            SizedBox(height: 12.0),
+                                            Container(
+                                              width: width * 0.8,
+                                              height: height * 0.6 * 0.25,
+                                              decoration: BoxDecoration(
+                                                image: DecorationImage(
+                                                  image: NetworkImage(
+                                                      items[0].enclosure.url),
+                                                  fit: BoxFit.cover,
+                                                ),
+                                              ),
+                                            ),
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                left: 8,
+                                                right: 8,
+                                              ),
+                                              child: Text(
+                                                '${items[0].title}',
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(
+                                                  fontFamily: textFont,
+                                                  fontSize: 15,
+                                                  color: textColor,
+                                                ),
+                                              ),
+                                            ),
+                                            Padding(
+                                              padding: const EdgeInsets.all(7),
+                                              child: Text(
+                                                'By: ${items[0].author} , at ${items[0].pubDate.toString().substring(0, 16)}',
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(
+                                                  fontFamily: textFont,
+                                                  fontSize: 13,
+                                                  color: textColor,
+                                                ),
+                                              ),
+                                            ),
+                                            Padding(
+                                              padding: const EdgeInsets.all(7),
+                                              child: InkWell(
+                                                onTap: () => null,
+                                                child: Text(
+                                                  '${items[0].link}',
+                                                  textAlign: TextAlign.center,
+                                                  style: TextStyle(
+                                                    fontFamily: textFont,
+                                                    decoration: TextDecoration
+                                                        .underline,
+                                                    color: textColor,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                            SizedBox(height: 12.0),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(height: 12.0),
+                                    MaterialButton(
+                                      child: Text(
+                                        'See more',
+                                      ),
+                                      shape: StadiumBorder(),
+                                      textColor: darkTheme
+                                          ? Colors.black
+                                          : Colors.white,
+                                      color: darkTheme
+                                          ? color
+                                          : Colors.lightBlue[700],
+                                      padding: const EdgeInsets.only(
+                                        top: 13,
+                                        bottom: 13,
+                                        right: 30,
+                                        left: 30,
+                                      ),
+                                      onPressed: () =>
+                                          null, // go the new list view
+                                    ),
+                                    SizedBox(height: 12.0),
+                                  ]);
+                                }
+                              } else if (snapshot.hasError) {
+                                return Text(
+                                  '${snapshot.error}',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontFamily: 'roboto',
+                                    color: Colors.red,
+                                    fontSize: 20,
+                                  ),
+                                );
+                              }
+
+                              return Center(
+                                child: CircularProgressIndicator(),
+                              );
+                            }),
+                        FutureBuilder(
+                            future:
+                                investingRss.loadFeed('NEWS', 'Economy News'),
+                            builder: (context, snapshot) {
+                              if (snapshot.hasData) {
+                                Object obj = snapshot.data!;
+                                final list = checkType(obj);
+
+                                if (list is List<InvestingRssNews>) {
+                                  List<InvestingRssNews> items = list;
+
+                                  return Column(children: [
+                                    Card(
+                                      color: Color(0xffeeeeee),
+                                      borderOnForeground: true,
+                                      child: Container(
+                                        width: width * 0.8,
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            SizedBox(height: 12),
+                                            Text(
+                                              'Economy News',
+                                              textAlign: TextAlign.center,
+                                              style: TextStyle(
+                                                fontFamily: textFont,
+                                                fontSize: 20,
+                                                color: textColor,
+                                              ),
+                                            ),
+                                            SizedBox(height: 12.0),
+                                            Container(
+                                              width: width * 0.8,
+                                              height: height * 0.6 * 0.25,
+                                              decoration: BoxDecoration(
+                                                image: DecorationImage(
+                                                  image: NetworkImage(
+                                                      items[0].enclosure.url),
+                                                  fit: BoxFit.cover,
+                                                ),
+                                              ),
+                                            ),
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                left: 8,
+                                                right: 8,
+                                              ),
+                                              child: Text(
+                                                '${items[0].title}',
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(
+                                                  fontFamily: textFont,
+                                                  fontSize: 15,
+                                                  color: textColor,
+                                                ),
+                                              ),
+                                            ),
+                                            Padding(
+                                              padding: const EdgeInsets.all(7),
+                                              child: Text(
+                                                'By: ${items[0].author} , at ${items[0].pubDate.toString().substring(0, 16)}',
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(
+                                                  fontFamily: textFont,
+                                                  fontSize: 13,
+                                                  color: textColor,
+                                                ),
+                                              ),
+                                            ),
+                                            Padding(
+                                              padding: const EdgeInsets.all(7),
+                                              child: InkWell(
+                                                onTap: () => null,
+                                                child: Text(
+                                                  '${items[0].link}',
+                                                  textAlign: TextAlign.center,
+                                                  style: TextStyle(
+                                                    fontFamily: textFont,
+                                                    decoration: TextDecoration
+                                                        .underline,
+                                                    color: textColor,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                            SizedBox(height: 12.0),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(height: 12),
+                                    MaterialButton(
+                                      child: Text(
+                                        'See more',
+                                      ),
+                                      shape: StadiumBorder(),
+                                      textColor: darkTheme
+                                          ? Colors.black
+                                          : Colors.white,
+                                      color: darkTheme
+                                          ? color
+                                          : Colors.lightBlue[700],
+                                      padding: const EdgeInsets.only(
+                                        top: 13,
+                                        bottom: 13,
+                                        right: 30,
+                                        left: 30,
+                                      ),
+                                      onPressed: () =>
+                                          null, // go the new list view
+                                    ),
+                                    SizedBox(height: 12)
+                                  ]);
+                                }
+                              } else if (snapshot.hasError) {
+                                return Text(
+                                  '${snapshot.error}',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontFamily: 'roboto',
+                                    color: Colors.red,
+                                    fontSize: 20,
+                                  ),
+                                );
+                              }
+
+                              return Center(
+                                child: CircularProgressIndicator(),
+                              );
+                            }),
+                      ]),
+                );
+
+                // contact us
+                contacts = Container(
+                  width: MediaQuery.of(context).size.width,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: MediaQuery.of(context).size.width,
+                        height: 70,
+                        margin: const EdgeInsets.all(15.0),
+                        child: TextFormField(
+                          controller: name,
+                          style: TextStyle(
+                            fontFamily: textFont,
+                            color: textColor,
                           ),
-                          border: OutlineInputBorder(
-                            borderSide: BorderSide(width: 1.0, color: Colors.lightBlue),
-                            borderRadius: BorderRadius.circular(50.0),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(width: 1.0, color: Colors.lightBlue),
-                            borderRadius: BorderRadius.circular(50.0),
+                          cursorColor: textColor,
+                          keyboardType: TextInputType.text,
+                          decoration: InputDecoration(
+                            hintText: 'Name',
+                            hintStyle: TextStyle(
+                              fontFamily: textFont,
+                              color: textColor,
+                            ),
+                            border: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                  width: 2.0,
+                                  color: darkTheme
+                                      ? color
+                                      : Colors.lightBlue[700]!),
+                              borderRadius: BorderRadius.circular(50.0),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                  width: 1.0,
+                                  color: darkTheme
+                                      ? color
+                                      : Colors.lightBlue[700]!),
+                              borderRadius: BorderRadius.circular(50.0),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                  width: 1.0,
+                                  color: darkTheme
+                                      ? color
+                                      : Colors.lightBlue[700]!),
+                              borderRadius: BorderRadius.circular(50.0),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    Container(
-                      width: MediaQuery.of(context).size.width,
-                      height: 70,
-                      margin: const EdgeInsets.all(15.0),
-                      child: TextFormField(
-                        controller: email,
-                        style: TextStyle(
-                          fontFamily: 'Trebuchet MS',
-                          color: Colors.black,
-                        ),
-                        cursorColor: Colors.black,
-                        keyboardType: TextInputType.emailAddress,
-                        decoration: InputDecoration(
-                          hintText: 'Email Address',
-                          hintStyle: TextStyle(
-                            fontFamily: 'Trebuchet MS',
-                            color: Colors.black,
+                      Container(
+                        width: MediaQuery.of(context).size.width,
+                        height: 70,
+                        margin: const EdgeInsets.all(15.0),
+                        child: TextFormField(
+                          controller: email,
+                          style: TextStyle(
+                            fontFamily: textFont,
+                            color: textColor,
                           ),
-                          border: OutlineInputBorder(
-                            borderSide: BorderSide(width: 1.0, color: Colors.lightBlue),
-                            borderRadius: BorderRadius.circular(50.0),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(width: 1.0, color: Colors.lightBlue),
-                            borderRadius: BorderRadius.circular(50.0),
-                          ),
-                        ),
-                      ),
-                    ),
-                    Container(
-                      width: MediaQuery.of(context).size.width,
-                      height: 70,
-                      margin: const EdgeInsets.all(15.0),
-                      child: TextFormField(
-                        controller: message,
-                        style: TextStyle(
-                          fontFamily: 'Trebuchet MS',
-                          color: Colors.black,
-                        ),
-                        cursorColor: Colors.black,
-                        keyboardType: TextInputType.text,
-                        decoration: InputDecoration(
-                          hintText: 'Message',
-                          hintStyle: TextStyle(
-                            fontFamily: 'Trebuchet MS',
-                            color: Colors.black,
-                          ),
-                          border: OutlineInputBorder(
-                            borderSide: BorderSide(width: 1.0, color: Colors.lightBlue),
-                            borderRadius: BorderRadius.circular(50.0),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(width: 1.0, color: Colors.lightBlue),
-                            borderRadius: BorderRadius.circular(50.0),
+                          cursorColor: textColor,
+                          keyboardType: TextInputType.emailAddress,
+                          decoration: InputDecoration(
+                            hintText: 'Email Address',
+                            hintStyle: TextStyle(
+                              fontFamily: textFont,
+                              color: textColor,
+                            ),
+                            border: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                  width: 1.0,
+                                  color: darkTheme ? color : Colors.lightBlue),
+                              borderRadius: BorderRadius.circular(50.0),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                  width: 1.0,
+                                  color: darkTheme
+                                      ? color
+                                      : Colors.lightBlue[700]!),
+                              borderRadius: BorderRadius.circular(50.0),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                  width: 1.0,
+                                  color: darkTheme ? color : Colors.lightBlue),
+                              borderRadius: BorderRadius.circular(50.0),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    SizedBox(height: 25,),
-                    MaterialButton(
-                        onPressed: () => displayDialog(context, 'Attention', 'Coming soon...'),
-                        child: Text('Send Message', style:TextStyle(fontFamily: 'Trebuchet Ms', color: Colors.white,),),
+                      Container(
+                        width: MediaQuery.of(context).size.width,
+                        height: 70,
+                        margin: const EdgeInsets.all(15.0),
+                        child: TextFormField(
+                          controller: message,
+                          style: TextStyle(
+                            fontFamily: textFont,
+                            color: textColor,
+                          ),
+                          cursorColor: textColor,
+                          keyboardType: TextInputType.text,
+                          decoration: InputDecoration(
+                            hintText: 'Message',
+                            hintStyle: TextStyle(
+                              fontFamily: textFont,
+                              color: textColor,
+                            ),
+                            border: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                  width: 1.0,
+                                  color: darkTheme ? color : Colors.lightBlue),
+                              borderRadius: BorderRadius.circular(50.0),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                  width: 1.0,
+                                  color: darkTheme
+                                      ? color
+                                      : Colors.lightBlue[700]!),
+                              borderRadius: BorderRadius.circular(50.0),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                  width: 1.0,
+                                  color: darkTheme ? color : Colors.lightBlue),
+                              borderRadius: BorderRadius.circular(50.0),
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        height: 25,
+                      ),
+                      MaterialButton(
+                        onPressed: () => displayDialog(
+                            context, 'Attention', 'Coming soon...'),
+                        child: Text(
+                          'Send Message',
+                          style: TextStyle(
+                            fontFamily: textFont,
+                            color: Colors.black,
+                          ),
+                        ),
                         shape: StadiumBorder(),
-                        color: Colors.lightBlue[700],
+                        color: darkTheme ? color : Colors.lightBlue[700],
                         padding: EdgeInsets.only(
                           top: 20,
                           bottom: 20,
                           left: 40,
                           right: 40,
                         ),
-                    ),
-                    SizedBox(height: 20.0),
-                  ],
-                ),
-              );
+                      ),
+                      SizedBox(height: 20.0),
+                    ],
+                  ),
+                );
 
-            }else{
-              // web view definitions
-              // banner
-              banner = Stack(
-                children: [
+                // team
+                team = Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      createTeamMemberCard(
+                          context,
+                          teamList[0]['name']!,
+                          teamList[0]['position']!,
+                          teamList[0]['qualification']!,
+                          teamList[0]['image']!),
+                      createTeamMemberCard(
+                          context,
+                          teamList[2]['name']!,
+                          teamList[2]['position']!,
+                          teamList[2]['qualification']!,
+                          teamList[2]['image']!),
+                      createTeamMemberCard(
+                          context,
+                          teamList[1]['name']!,
+                          teamList[1]['position']!,
+                          teamList[1]['qualification']!,
+                          teamList[1]['image']!),
+                    ]);
+
+                // philosophy
+                philosophy = Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: MediaQuery.of(context).size.width * 0.7,
+                      decoration: BoxDecoration(
+                        color: darkTheme ? color : Colors.lightBlue,
+                        borderRadius: BorderRadius.circular(5.0),
+                        boxShadow: [
+                          BoxShadow(
+                            color: darkTheme
+                                ? Color.fromRGBO(209, 168, 78, 0.5)
+                                : Colors.lightBlue[200]!,
+                            spreadRadius: 5,
+                            blurRadius: 7,
+                            offset: Offset(0, 3),
+                          ),
+                        ],
+                      ),
+                      margin: EdgeInsets.all(15.0),
+                      padding: EdgeInsets.all(15),
+                      child: Text(
+                        'We have removed the guess work with our systematic data driven proprietary models for top/down, bottom/up market research.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontFamily: textFont,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
+                    Icon(
+                      Icons.arrow_downward,
+                      color: darkTheme ? color : Colors.black,
+                    ),
+                    Container(
+                      width: MediaQuery.of(context).size.width * 0.7,
+                      decoration: BoxDecoration(
+                        color: darkTheme ? color : Colors.lightBlue,
+                        borderRadius: BorderRadius.circular(5.0),
+                        boxShadow: [
+                          BoxShadow(
+                            color: darkTheme
+                                ? Color.fromRGBO(209, 168, 78, 0.5)
+                                : Colors.lightBlue[200]!,
+                            spreadRadius: 5,
+                            blurRadius: 7,
+                            offset: Offset(0, 3),
+                          ),
+                        ],
+                      ),
+                      margin: EdgeInsets.all(12.0),
+                      padding: EdgeInsets.only(
+                        top: 12.0,
+                        bottom: 12.0,
+                      ),
+                      child: Text(
+                        'Our portfolio construction process emphasizes on wealth preservation through systematic risk quantification and management.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontFamily: textFont,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
+                    Icon(
+                      Icons.arrow_downward,
+                      color: darkTheme ? color : Colors.black,
+                    ),
+                    Container(
+                      width: MediaQuery.of(context).size.width * 0.7,
+                      decoration: BoxDecoration(
+                        color: darkTheme ? color : Colors.lightBlue,
+                        borderRadius: BorderRadius.circular(5.0),
+                        boxShadow: [
+                          BoxShadow(
+                            color: darkTheme
+                                ? Color.fromRGBO(209, 168, 78, 0.5)
+                                : Colors.lightBlue[200]!,
+                            spreadRadius: 5,
+                            blurRadius: 7,
+                            offset: Offset(0, 3),
+                          ),
+                        ],
+                      ),
+                      margin: EdgeInsets.all(12.0),
+                      padding: EdgeInsets.only(
+                        top: 12.0,
+                        bottom: 12.0,
+                      ),
+                      child: Text(
+                        'We keep our investors fully informed monthly about the status of the market, expectation and mitigation measures, especially in the case of irrational market fear.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontFamily: textFont,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              } else {
+                // web view definitions
+                // banner
+                banner = Stack(children: [
                   Positioned(
                     child: Container(
                       padding: const EdgeInsets.all(10),
                       width: width,
-                      height: height * 0.8,
+                      height: height * 0.82,
                       decoration: BoxDecoration(
-                        image: DecorationImage(
-                          image: AssetImage('banner/banner_image.jpg'),
-                          fit: BoxFit.cover,
-                        )
-                      ),
+                          image: DecorationImage(
+                        image: AssetImage('assets/banner/banner_image.jpg'),
+                        fit: BoxFit.cover,
+                      )),
                     ),
                   ),
                   Container(
                     width: width,
-                    height: height * 0.8,
-                    color: Color.fromRGBO(0, 0, 0, 0.3),),
+                    height: height * 0.82,
+                    color: Color.fromRGBO(0, 0, 0, 0.3),
+                  ),
                   Positioned(
                     top: 0,
                     child: Container(
                       width: width,
-                      height: height * 0.7,
+                      height: height * 0.82,
                       child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: <Widget>[
-                              Container(
-                                padding: const EdgeInsets.all(30),
-                                margin: EdgeInsets.only(
-                                  left: width * 0.085,
-                                  right: width * 0.085,
-                                  top: 10
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(width * 0.1 * 0.5),
-                                ),
-                                child: Container(
-                                  width: width * 0.1,
-                                  height: width * 0.1,
-                                  decoration: BoxDecoration(
-                                    image: DecorationImage(
-                                      image: AssetImage('banner/icon.png',),
-                                      fit: BoxFit.cover,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: <Widget>[
+                                  Container(
+                                    padding: const EdgeInsets.all(30),
+                                    margin: EdgeInsets.only(
+                                        left: width * 0.085,
+                                        right: width * 0.085,
+                                        top: 10),
+                                    decoration: BoxDecoration(
+                                      color: darkTheme
+                                          ? Colors.black
+                                          : Colors.white,
+                                      borderRadius: BorderRadius.circular(
+                                          width * 0.1 * 0.5),
                                     ),
-                                  ),
-                                ),
-                              ),
-                              InkWell(
-                                onTap: () => null,
-                                onHover: (hovering){
-                                  setState(() {
-                                    isHovering1 = hovering;
-                                  });
-                                },
-                                child: AnimatedContainer(
-                                  duration: const Duration(milliseconds: 200),
-                                  curve: Curves.ease,
-                                  width: width * 0.3,
-                                  height: height * 0.3,
-                                  color: isHovering1 ? Color.fromRGBO(3, 169, 244, 0.3) : Colors.transparent,
-                                  child: Padding(
-                                    padding: EdgeInsets.only(
-                                      left: 25,
-                                      right: 25,
-                                      top: 50,
-                                    ),
-                                    child: AnimatedDefaultTextStyle(
-                                      duration: Duration(milliseconds: 200),
-                                      style: TextStyle(
-                                        fontFamily: 'Trebuchet MS',
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w700,
-                                        fontSize: isHovering1 ? 28 : 25,),
-                                      child: Text(
-                                        'SMD Capital is a data driven investment hedge fund. We employ proprietary models to capture returns',
-                                        textAlign: TextAlign.center,
+                                    child: Container(
+                                      width: width * 0.1,
+                                      height: width * 0.1,
+                                      decoration: BoxDecoration(
+                                        image: DecorationImage(
+                                          image: AssetImage(
+                                            darkTheme
+                                                ? 'assets/banner/gold.png'
+                                                : 'assets/banner/icon.png',
+                                          ),
+                                          fit: BoxFit.cover,
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ),
-                              ),
-                              InkWell(
-                                onTap: () => null,
-                                onHover: (hovering){
-                                  setState(() {
-                                    isHovering2 = hovering;
-                                  });
-                                },
-                                child: AnimatedContainer(
-                                  duration: const Duration(milliseconds: 200),
-                                  curve: Curves.ease,
-                                  width: width * 0.3,
-                                  height: height * 0.3,
-                                  color: isHovering2 ? Color.fromRGBO(3, 169, 244, 0.3) : Colors.transparent,
-                                  child: Padding(
-                                    padding: EdgeInsets.only(
-                                      left: 25,
-                                      right: 25,
-                                      top: 40,
-                                    ),
-                                    child: AnimatedDefaultTextStyle(
-                                      duration: Duration(milliseconds: 200),
-                                      style: TextStyle(
-                                        fontFamily: 'Trebuchet MS',
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w700,
-                                        fontSize: isHovering2 ? 25 : 22,),
-                                      child: Text(
-                                        'Our legacy investment strategies are non correlated and capitalize on Macro themes, Volatility, Distressed Assets, Risk Premium, Sector Rotation, Value and Growth',
-                                        textAlign: TextAlign.center,
+                                  InkWell(
+                                    onTap: () => null,
+                                    onHover: (hovering) {
+                                      setState(() {
+                                        isHovering1 = hovering;
+                                      });
+                                    },
+                                    child: AnimatedContainer(
+                                      duration:
+                                          const Duration(milliseconds: 200),
+                                      curve: Curves.ease,
+                                      width: width * 0.3,
+                                      height: height * 0.3,
+                                      color: isHovering1
+                                          ? darkTheme
+                                              ? Color.fromRGBO(
+                                                  209, 168, 78, 0.5)
+                                              : Color.fromRGBO(3, 169, 244, 0.3)
+                                          : Colors.transparent,
+                                      child: Padding(
+                                        padding: EdgeInsets.only(
+                                          left: 25,
+                                          right: 25,
+                                          top: 30,
+                                        ),
+                                        child: AnimatedDefaultTextStyle(
+                                          duration: Duration(milliseconds: 200),
+                                          style: TextStyle(
+                                            fontFamily: 'Trebuchet MS',
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.w700,
+                                            fontSize: isHovering1 ? 28 : 25,
+                                          ),
+                                          child: Text(
+                                            'SMD Capital is a data driven investment hedge fund. We employ proprietary models to capture returns',
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                              fontFamily: textFont,
+                                            ),
+                                          ),
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ),
-                              ),
-                            ]
-                          ),
-                          SizedBox(height: height * 0.1),
-                          Row(
-                            children: <Widget>[
+                                  InkWell(
+                                    onTap: () => null,
+                                    onHover: (hovering) {
+                                      setState(() {
+                                        isHovering2 = hovering;
+                                      });
+                                    },
+                                    child: AnimatedContainer(
+                                      duration:
+                                          const Duration(milliseconds: 200),
+                                      curve: Curves.ease,
+                                      width: width * 0.3,
+                                      height: height * 0.3,
+                                      color: isHovering2
+                                          ? darkTheme
+                                              ? Color.fromRGBO(
+                                                  209, 168, 78, 0.5)
+                                              : Color.fromRGBO(3, 169, 244, 0.3)
+                                          : Colors.transparent,
+                                      child: Padding(
+                                        padding: EdgeInsets.only(
+                                          left: 25,
+                                          right: 25,
+                                          top: 20,
+                                        ),
+                                        child: AnimatedDefaultTextStyle(
+                                          duration: Duration(milliseconds: 200),
+                                          style: TextStyle(
+                                            fontFamily: textFont,
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.w700,
+                                            fontSize: isHovering2 ? 25 : 22,
+                                          ),
+                                          child: Text(
+                                            'Our legacy investment strategies are non correlated and capitalize on Macro themes, Volatility, Distressed Assets, Risk Premium, Sector Rotation, Value and Growth',
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ]),
+                            SizedBox(height: height * 0.1),
+                            Row(children: <Widget>[
                               InkWell(
                                 onTap: () => null,
-                                onHover: (hovering){
+                                onHover: (hovering) {
                                   setState(() {
                                     isHovering3 = hovering;
                                   });
@@ -1320,20 +1762,25 @@ class HomePageState extends State<HomePage>{
                                   curve: Curves.ease,
                                   width: width * 0.3,
                                   height: height * 0.3,
-                                  color: isHovering3 ? Color.fromRGBO(3, 169, 244, 0.3) : Colors.transparent,
+                                  color: isHovering3
+                                      ? darkTheme
+                                          ? Color.fromRGBO(209, 168, 78, 0.5)
+                                          : Color.fromRGBO(3, 169, 244, 0.3)
+                                      : Colors.transparent,
                                   child: Padding(
                                     padding: EdgeInsets.only(
                                       left: 25,
                                       right: 25,
-                                      top: 40,
+                                      top: 20,
                                     ),
                                     child: AnimatedDefaultTextStyle(
                                       duration: Duration(milliseconds: 200),
                                       style: TextStyle(
-                                        fontFamily: 'Trebuchet MS',
+                                        fontFamily: textFont,
                                         color: Colors.white,
                                         fontWeight: FontWeight.w700,
-                                        fontSize: isHovering3 ? 30 : 26,),
+                                        fontSize: isHovering3 ? 30 : 26,
+                                      ),
                                       child: Text(
                                         'Our mission is to protect wealth and a gradual organic growth of assets, leveraging compound interest',
                                         textAlign: TextAlign.center,
@@ -1344,7 +1791,7 @@ class HomePageState extends State<HomePage>{
                               ),
                               InkWell(
                                 onTap: () => null,
-                                onHover: (hovering){
+                                onHover: (hovering) {
                                   setState(() {
                                     isHovering4 = hovering;
                                   });
@@ -1354,20 +1801,25 @@ class HomePageState extends State<HomePage>{
                                   curve: Curves.ease,
                                   width: width * 0.3,
                                   height: height * 0.3,
-                                  color: isHovering4 ? Color.fromRGBO(3, 169, 244, 0.3) : Colors.transparent,
+                                  color: isHovering4
+                                      ? darkTheme
+                                          ? Color.fromRGBO(209, 168, 78, 0.5)
+                                          : Color.fromRGBO(3, 169, 244, 0.3)
+                                      : Colors.transparent,
                                   child: Padding(
                                     padding: EdgeInsets.only(
                                       left: 25,
                                       right: 25,
-                                      top: 40,
+                                      top: 20,
                                     ),
                                     child: AnimatedDefaultTextStyle(
                                       duration: Duration(milliseconds: 200),
                                       style: TextStyle(
-                                        fontFamily: 'Trebuchet MS',
+                                        fontFamily: textFont,
                                         color: Colors.white,
                                         fontWeight: FontWeight.w700,
-                                        fontSize: isHovering4 ? 30 : 26,),
+                                        fontSize: isHovering4 ? 28 : 26,
+                                      ),
                                       child: Text(
                                         'Our Foundation is INTEGRITY \nOur Strength is our PEOPLE \nOur Style is TEAMWORK \nOur Goal is EXCELLENCE',
                                         textAlign: TextAlign.center,
@@ -1378,7 +1830,7 @@ class HomePageState extends State<HomePage>{
                               ),
                               InkWell(
                                 onTap: () => null,
-                                onHover: (hovering){
+                                onHover: (hovering) {
                                   setState(() {
                                     isHovering5 = hovering;
                                   });
@@ -1388,20 +1840,25 @@ class HomePageState extends State<HomePage>{
                                   curve: Curves.ease,
                                   width: width * 0.3,
                                   height: height * 0.3,
-                                  color: isHovering5 ? Color.fromRGBO(3, 169, 244, 0.3) : Colors.transparent,
+                                  color: isHovering5
+                                      ? darkTheme
+                                          ? Color.fromRGBO(209, 168, 78, 0.5)
+                                          : Color.fromRGBO(3, 169, 244, 0.3)
+                                      : Colors.transparent,
                                   child: Padding(
                                     padding: EdgeInsets.only(
                                       left: 25,
                                       right: 25,
-                                      top: 40,
+                                      top: 35,
                                     ),
                                     child: AnimatedDefaultTextStyle(
                                       duration: Duration(milliseconds: 200),
                                       style: TextStyle(
-                                        fontFamily: 'Trebuchet MS',
+                                        fontFamily: textFont,
                                         color: Colors.white,
                                         fontWeight: FontWeight.w700,
-                                        fontSize: isHovering5 ? 33 : 27,),
+                                        fontSize: isHovering5 ? 33 : 27,
+                                      ),
                                       child: Text(
                                         'We have skin in the game. We own a larger percentage of all the portfolio\'s',
                                         textAlign: TextAlign.center,
@@ -1410,243 +1867,498 @@ class HomePageState extends State<HomePage>{
                                   ),
                                 ),
                               ),
-                            ]
-                          ),
-                        ]
-                      ),
+                            ]),
+                          ]),
                     ),
                   ),
-                ]
-              );
-              strategyFont = 23;
-              mobile = false;
+                ]);
+                strategyFont = 23;
+                mobile = false;
 
-              // strategists
-              strategistsTable = ListView(
-                shrinkWrap: true,
-                children: <Widget>[
-                  Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        Container(
-                          width: width * 0.15,
-                          padding: const EdgeInsets.all(7),
-                          child: Text('Porfolio', textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Trebuchet MS', fontSize: 18)),
+                // strategists
+                strategistsTable = ListView(
+                  shrinkWrap: true,
+                  children: <Widget>[
+                    Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          Container(
+                            width: width * 0.15,
+                            padding: const EdgeInsets.all(7),
+                            child: Text('Portfolio',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w800,
+                                  fontFamily: textFont,
+                                  fontSize: 28,
+                                  color: textColor,
+                                )),
+                          ),
+                          Container(
+                            width: width * 0.15,
+                            padding: const EdgeInsets.all(7),
+                            child: Text('Ticker',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w800,
+                                  fontFamily: textFont,
+                                  fontSize: 28,
+                                  color: textColor,
+                                )),
+                          ),
+                          Container(
+                            width: width * 0.15,
+                            padding: const EdgeInsets.all(7),
+                            child: Text('% Exposure',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w800,
+                                  fontFamily: textFont,
+                                  fontSize: 28,
+                                  color: textColor,
+                                )),
+                          ),
+                          Container(
+                            width: width * 0.15,
+                            padding: const EdgeInsets.all(7),
+                            child: Text('Returns (YoY)',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w800,
+                                  fontFamily: textFont,
+                                  color: textColor,
+                                  fontSize: 28,
+                                )),
+                          ),
+                        ]),
+                    Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          Container(
+                            width: width * 0.15,
+                            padding: const EdgeInsets.all(7),
+                            child: Text('Distressed Value Assets',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontFamily: textFont,
+                                  fontSize: 17,
+                                  color: textColor,
+                                )),
+                          ),
+                          Container(
+                            width: width * 0.15,
+                            padding: const EdgeInsets.all(7),
+                            child: Text('DVAP',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontFamily: 'Trebuchet MS',
+                                  fontSize: 17,
+                                  color: textColor,
+                                )),
+                          ),
+                          Container(
+                            width: width * 0.15,
+                            padding: const EdgeInsets.all(7),
+                            child: Text(
+                              '28%',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 17,
+                                color: textColor,
+                                fontFamily: 'Trebuchet MS',
+                              ),
+                            ),
+                          ),
+                          Container(
+                            width: width * 0.15,
+                            padding: const EdgeInsets.all(7),
+                            child: Text('28%',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 17,
+                                  color: textColor,
+                                  fontFamily: textFont,
+                                )),
+                          ),
+                        ]),
+                    Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          Container(
+                            width: width * 0.15,
+                            padding: const EdgeInsets.all(7),
+                            child: Text('Emerging Trends',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 17,
+                                  color: textColor,
+                                  fontFamily: textFont,
+                                )),
+                          ),
+                          Container(
+                            width: width * 0.15,
+                            padding: const EdgeInsets.all(7),
+                            child: Text('ETP',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 17,
+                                  fontFamily: textFont,
+                                  color: textColor,
+                                )),
+                          ),
+                          Container(
+                            width: width * 0.15,
+                            padding: const EdgeInsets.all(7),
+                            child: Text('26%',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 17,
+                                  fontFamily: textFont,
+                                  color: textColor,
+                                )),
+                          ),
+                          Container(
+                            width: width * 0.15,
+                            padding: const EdgeInsets.all(7),
+                            child: Text(
+                              '20%',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 17,
+                                fontFamily: textFont,
+                                color: textColor,
+                              ),
+                            ),
+                          ),
+                        ]),
+                    Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          Container(
+                            width: width * 0.15,
+                            padding: const EdgeInsets.all(7),
+                            child: Text(
+                              'Defensive Investing',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 17,
+                                fontFamily: textFont,
+                                color: textColor,
+                              ),
+                            ),
+                          ),
+                          Container(
+                            width: width * 0.15,
+                            padding: const EdgeInsets.all(7),
+                            child: Text('DIP',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 17,
+                                  fontFamily: textFont,
+                                  color: textColor,
+                                )),
+                          ),
+                          Container(
+                            width: width * 0.15,
+                            padding: const EdgeInsets.all(7),
+                            child: Text('10%',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 17,
+                                  fontFamily: textFont,
+                                  color: textColor,
+                                )),
+                          ),
+                          Container(
+                            width: width * 0.15,
+                            padding: const EdgeInsets.all(7),
+                            child: Text('13%',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 17,
+                                  fontFamily: textFont,
+                                  color: textColor,
+                                )),
+                          ),
+                        ]),
+                    Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          Container(
+                            width: width * 0.15,
+                            padding: const EdgeInsets.all(7),
+                            child: Text(
+                              'Risk Premium',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 17,
+                                fontFamily: textFont,
+                                color: textColor,
+                              ),
+                            ),
+                          ),
+                          Container(
+                            width: width * 0.15,
+                            padding: const EdgeInsets.all(7),
+                            child: Text(
+                              'RPP',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 17,
+                                fontFamily: textFont,
+                                color: textColor,
+                              ),
+                            ),
+                          ),
+                          Container(
+                            width: width * 0.15,
+                            padding: const EdgeInsets.all(7),
+                            child: Text(
+                              '5%',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 17,
+                                fontFamily: textFont,
+                                color: textColor,
+                              ),
+                            ),
+                          ),
+                          Container(
+                            width: width * 0.15,
+                            padding: const EdgeInsets.all(7),
+                            child: Text(
+                              '12.36%',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 17,
+                                fontFamily: textFont,
+                                color: textColor,
+                              ),
+                            ),
+                          ),
+                        ]),
+                    Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          Container(
+                            width: width * 0.15,
+                            padding: const EdgeInsets.all(7),
+                            child: Text(
+                              'Industrial Sector Rotation',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 17,
+                                fontFamily: textFont,
+                                color: textColor,
+                              ),
+                            ),
+                          ),
+                          Container(
+                            width: width * 0.15,
+                            padding: const EdgeInsets.all(7),
+                            child: Text(
+                              'ISRP',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 17,
+                                fontFamily: textFont,
+                                color: textColor,
+                              ),
+                            ),
+                          ),
+                          Container(
+                            width: width * 0.15,
+                            padding: const EdgeInsets.all(7),
+                            child: Text(
+                              '5%',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 17,
+                                fontFamily: textFont,
+                                color: textColor,
+                              ),
+                            ),
+                          ),
+                          Container(
+                            width: width * 0.15,
+                            padding: const EdgeInsets.all(7),
+                            child: Text(
+                              '7.53%',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 17,
+                                fontFamily: textFont,
+                                color: textColor,
+                              ),
+                            ),
+                          ),
+                        ]),
+                    Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          Container(
+                            width: width * 0.15,
+                            padding: const EdgeInsets.all(7),
+                            child: Text('All Weather',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 17,
+                                  fontFamily: textFont,
+                                  color: textColor,
+                                )),
+                          ),
+                          Container(
+                            width: width * 0.15,
+                            padding: const EdgeInsets.all(7),
+                            child: Text(
+                              'AWP',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 17,
+                                fontFamily: textFont,
+                                color: textColor,
+                              ),
+                            ),
+                          ),
+                          Container(
+                            width: width * 0.15,
+                            padding: const EdgeInsets.all(7),
+                            child: Text(
+                              '10%',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 17,
+                                fontFamily: textFont,
+                                color: textColor,
+                              ),
+                            ),
+                          ),
+                          Container(
+                            width: width * 0.15,
+                            padding: const EdgeInsets.all(7),
+                            child: Text(
+                              '2.05%',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 17,
+                                fontFamily: textFont,
+                                color: textColor,
+                              ),
+                            ),
+                          ),
+                        ]),
+                    Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          Container(
+                            width: width * 0.15,
+                            padding: const EdgeInsets.all(7),
+                            child: Text(
+                              'Multiple Currencies',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 17,
+                                fontFamily: textFont,
+                                color: textColor,
+                              ),
+                            ),
+                          ),
+                          Container(
+                            width: width * 0.15,
+                            padding: const EdgeInsets.all(7),
+                            child: Text('MCP',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 17,
+                                  fontFamily: textFont,
+                                  color: textColor,
+                                )),
+                          ),
+                          Container(
+                            width: width * 0.15,
+                            padding: const EdgeInsets.all(7),
+                            child: Text(
+                              '16%',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 17,
+                                fontFamily: textFont,
+                                color: textColor,
+                              ),
+                            ),
+                          ),
+                          Container(
+                            width: width * 0.15,
+                            padding: const EdgeInsets.all(7),
+                            child: Text(
+                              '11%',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 17,
+                                fontFamily: textFont,
+                                color: textColor,
+                              ),
+                            ),
+                          ),
+                        ]),
+                    Container(
+                        decoration: BoxDecoration(
+                          color: darkTheme ? color : Colors.lightBlue,
                         ),
-                        Container(
-                          width: width * 0.15,
-                          padding: const EdgeInsets.all(7),
-                          child: Text('Ticker', textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Trebuchet MS', fontSize: 18)),
+                        width: width * 0.5,
+                        margin: EdgeInsets.only(
+                          top: 10,
+                          bottom: 10,
+                          left: width * 0.4,
+                          right: width * 0.4,
                         ),
-                        Container(
-                          width: width * 0.15,
-                          padding: const EdgeInsets.all(7),
-                          child: Text('% Exposure', textAlign: TextAlign.center, style:TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Trebuchet MS', fontSize: 18)),
-                        ),
-                        Container(
-                          width: width * 0.15,
-                          padding: const EdgeInsets.all(7),
-                          child: Text('Returns (YoY)', textAlign: TextAlign.center, style:TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Trebuchet MS', fontSize: 18)),
-                        ),
-                      ]
-                  ),
-                  Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        Container(
-                          width: width * 0.15,
-                          padding: const EdgeInsets.all(7),
-                          child: Text('Distressed Value Assets', textAlign: TextAlign.center, style: TextStyle(fontFamily: 'Trebuchet MS', fontSize: 17)),
-                        ),
-                        Container(
-                          width: width * 0.15,
-                          padding: const EdgeInsets.all(7),
-                          child: Text('DVAP', textAlign: TextAlign.center, style: TextStyle(fontFamily: 'Trebuchet MS', fontSize: 17)),
-                        ),
-                        Container(
-                          width: width * 0.15,
-                          padding: const EdgeInsets.all(7),
-                          child: Text('28%', textAlign: TextAlign.center, style:TextStyle(fontSize: 17, fontFamily: 'Trebuchet MS')),
-                        ),
-                        Container(
-                          width: width * 0.15,
-                          padding: const EdgeInsets.all(7),
-                          child: Text('28%', textAlign: TextAlign.center, style:TextStyle(fontSize: 17, fontFamily: 'Trebuchet MS')),
-                        ),
-                      ]
-                  ),
-                  Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        Container(
-                          width : width * 0.15,
-                          padding: const EdgeInsets.all(7),
-                          child: Text('Emerging Trends', textAlign: TextAlign.center, style: TextStyle(fontSize: 17, fontFamily: 'Trebuchet MS')),
-                        ),
-                        Container(
-                          width: width * 0.15,
-                          padding: const EdgeInsets.all(7),
-                          child: Text('ETP', textAlign: TextAlign.center, style: TextStyle(fontSize: 17, fontFamily: 'Trebuchet MS')),
-                        ),
-                        Container(
-                          width: width * 0.15,
-                          padding: const EdgeInsets.all(7),
-                          child: Text('26%', textAlign: TextAlign.center, style:TextStyle(fontSize: 17, fontFamily: 'Trebuchet MS')),
-                        ),
-                        Container(
-                          width: width * 0.15,
-                          padding: const EdgeInsets.all(7),
-                          child: Text('20%', textAlign: TextAlign.center, style:TextStyle(fontSize: 17, fontFamily: 'Trebuchet MS')),
-                        ),
-                      ]
-                  ),
-                  Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        Container(
-                          width: width * 0.15,
-                          padding: const EdgeInsets.all(7),
-                          child: Text('Defensive Investing', textAlign: TextAlign.center, style: TextStyle(fontSize: 17, fontFamily: 'Trebuchet MS')),
-                        ),
-                        Container(
-                          width: width * 0.15,
-                          padding: const EdgeInsets.all(7),
-                          child: Text('DIP', textAlign: TextAlign.center, style: TextStyle(fontSize: 17, fontFamily: 'Trebuchet MS')),
-                        ),
-                        Container(
-                          width: width * 0.15,
-                          padding: const EdgeInsets.all(7),
-                          child: Text('10%', textAlign: TextAlign.center, style:TextStyle(fontSize: 17, fontFamily: 'Trebuchet MS')),
-                        ),
-                        Container(
-                          width: width * 0.15,
-                          padding: const EdgeInsets.all(7),
-                          child: Text('13%', textAlign: TextAlign.center, style:TextStyle(fontSize: 17, fontFamily: 'Trebuchet MS')),
-                        ),
-                      ]
-                  ),
-                  Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        Container(
-                          width: width * 0.15,
-                          padding: const EdgeInsets.all(7),
-                          child: Text('Risk Premium', textAlign: TextAlign.center, style: TextStyle(fontSize: 17, fontFamily: 'Trebuchet MS')),
-                        ),
-                        Container(
-                          width: width * 0.15,
-                          padding: const EdgeInsets.all(7),
-                          child: Text('RPP', textAlign: TextAlign.center, style: TextStyle(fontSize: 17, fontFamily: 'Trebuchet MS')),
-                        ),
-                        Container(
-                          width: width * 0.15,
-                          padding: const EdgeInsets.all(7),
-                          child: Text('5%', textAlign: TextAlign.center, style:TextStyle(fontSize: 17, fontFamily: 'Trebuchet MS')),
-                        ),
-                        Container(
-                          width: width * 0.15,
-                          padding: const EdgeInsets.all(7),
-                          child: Text('12.36%', textAlign: TextAlign.center, style:TextStyle(fontSize: 17, fontFamily: 'Trebuchet MS')),
-                        ),
-                      ]
-                  ),
-                  Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        Container(
-                          width: width * 0.15,
-                          padding: const EdgeInsets.all(7),
-                          child: Text('Industrial Sector Rotation', textAlign: TextAlign.center, style: TextStyle(fontSize: 17, fontFamily: 'Trebuchet MS')),
-                        ),
-                        Container(
-                          width: width * 0.15,
-                          padding: const EdgeInsets.all(7),
-                          child: Text('ISRP', textAlign: TextAlign.center, style: TextStyle(fontSize: 17, fontFamily: 'Trebuchet MS')),
-                        ),
-                        Container(
-                          width: width * 0.15,
-                          padding: const EdgeInsets.all(7),
-                          child: Text('5%', textAlign: TextAlign.center, style:TextStyle(fontSize: 17, fontFamily: 'Trebuchet MS')),
-                        ),
-                        Container(
-                          width: width * 0.15,
-                          padding: const EdgeInsets.all(7),
-                          child: Text('7.53%', textAlign: TextAlign.center, style:TextStyle(fontSize: 17, fontFamily: 'Trebuchet MS')),
-                        ),
-                      ]
-                  ),
-                  Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        Container(
-                          width: width * 0.15,
-                          padding: const EdgeInsets.all(7),
-                          child: Text('All Weather', textAlign: TextAlign.center, style: TextStyle(fontSize: 17, fontFamily: 'Trebuchet MS')),
-                        ),
-                        Container(
-                          width: width * 0.15,
-                          padding: const EdgeInsets.all(7),
-                          child: Text('AWP', textAlign: TextAlign.center, style: TextStyle(fontSize: 17, fontFamily: 'Trebuchet MS')),
-                        ),
-                        Container(
-                          width: width * 0.15,
-                          padding: const EdgeInsets.all(7),
-                          child: Text('10%', textAlign: TextAlign.center, style:TextStyle(fontSize: 17, fontFamily: 'Trebuchet MS')),
-                        ),
-                        Container(
-                          width: width * 0.15,
-                          padding: const EdgeInsets.all(7),
-                          child: Text('2.05%', textAlign: TextAlign.center, style:TextStyle(fontSize: 17, fontFamily: 'Trebuchet MS')),
-                        ),
-                      ]
-                  ),
-                  Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        Container(
-                          width: width * 0.15,
-                          padding: const EdgeInsets.all(7),
-                          child: Text('Multiple Currencies', textAlign: TextAlign.center, style: TextStyle(fontSize: 17, fontFamily: 'Trebuchet MS')),
-                        ),
-                        Container(
-                          width: width * 0.15,
-                          padding: const EdgeInsets.all(7),
-                          child: Text('MCP', textAlign: TextAlign.center, style: TextStyle(fontSize: 17, fontFamily: 'Trebuchet MS')),
-                        ),
-                        Container(
-                          width: width * 0.15,
-                          padding: const EdgeInsets.all(7),
-                          child: Text('16%', textAlign: TextAlign.center, style:TextStyle(fontSize: 17, fontFamily: 'Trebuchet MS')),
-                        ),
-                        Container(
-                          width: width  * 0.15,
-                          padding: const EdgeInsets.all(7),
-                          child: Text('11%', textAlign: TextAlign.center, style:TextStyle(fontSize: 17, fontFamily: 'Trebuchet MS')),
-                        ),
-                      ]
-                  ),
-                ],
-              );
+                        child: InkWell(
+                          onTap: () => null,
+                          onHover: (hovering) {
+                            if (hovering) {
+                              setState(() {
+                                strategistsMore = hovering;
+                              });
+                            } else {
+                              setState(() {
+                                strategistsMore = hovering;
+                              });
+                            }
+                          },
+                          child: Container(
+                            padding: EdgeInsets.all(12.0),
+                            child: Text(
+                              'Learn more about Strategists',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontFamily: 'Trebuchet MS',
+                                fontSize: 20,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ),
+                        )),
+                  ],
+                );
 
-
-              // news
-              /*news = CarouselSlider(
+                // news
+                /*news = CarouselSlider(
                 items: [
                   // 1st item
                   Container(
@@ -2184,631 +2896,846 @@ class HomePageState extends State<HomePage>{
                   viewportFraction: 1,
                 ),
               );*/
-              news = Container(
-                child: Column(
-                    children: [
-                      SizedBox(height: 15.0),
-                      Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            FutureBuilder(
-                                future: investingRss.loadFeed('NEWS', 'All News'),
-                                builder: (context, snapshot){
+                news = Container(
+                  child: Column(children: [
+                    SizedBox(height: 15.0),
+                    Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          FutureBuilder(
+                              future: investingRss.loadFeed('NEWS', 'All News'),
+                              builder: (context, snapshot) {
+                                if (snapshot.hasData) {
+                                  Object obj = snapshot.data!;
+                                  final list = checkType(obj);
 
-                                  if(snapshot.hasData){
-                                    Object obj = snapshot.data!;
-                                    final list = checkType(obj);
+                                  if (list is List<InvestingRssNews>) {
+                                    List<InvestingRssNews> items = list;
 
-                                    if(list is List<InvestingRssNews>){
-                                      List<InvestingRssNews> items = list;
-
-                                      return Column(
-                                        children: [
-                                          Card(
-                                            color: Color(0xffeeeeee),
-                                            child: Container(
-                                              width: width * 0.24,
-                                              child:Column(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  SizedBox(height: 12),
-                                                  Text(
-                                                    'All news',
+                                    return Column(
+                                      children: [
+                                        Card(
+                                          color: Color(0xffeeeeee),
+                                          child: Container(
+                                            width: width * 0.24,
+                                            child: Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                SizedBox(height: 12),
+                                                Text(
+                                                  'All news',
+                                                  textAlign: TextAlign.center,
+                                                  style: TextStyle(
+                                                    fontFamily: 'Trebuchet MS',
+                                                    fontSize: 20,
+                                                    color: Colors.black,
+                                                  ),
+                                                ),
+                                                SizedBox(height: 12),
+                                                Container(
+                                                  width: width * 0.24,
+                                                  height: height * 0.6 * 0.25,
+                                                  decoration: BoxDecoration(
+                                                    image: DecorationImage(
+                                                      image: NetworkImage(
+                                                          items[0]
+                                                              .enclosure
+                                                              .url),
+                                                      fit: BoxFit.cover,
+                                                    ),
+                                                  ),
+                                                ),
+                                                Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                    left: 8,
+                                                    right: 8,
+                                                  ),
+                                                  child: Text(
+                                                    '${items[0].title}',
                                                     textAlign: TextAlign.center,
                                                     style: TextStyle(
-                                                      fontFamily: 'Trebuchet MS',
-                                                      fontSize: 20,
+                                                      fontFamily:
+                                                          'Trebuchet MS',
+                                                      fontSize: 15,
                                                       color: Colors.black,
                                                     ),
                                                   ),
-                                                  SizedBox(height: 12),
-                                                  Container(
-                                                    width :width * 0.24,
-                                                    height: height * 0.6 * 0.25,
-                                                    decoration: BoxDecoration(
-                                                      image: DecorationImage(
-                                                        image: NetworkImage(items[0].enclosure.url),
-                                                        fit: BoxFit.cover,
-                                                      ),
+                                                ),
+                                                Padding(
+                                                  padding:
+                                                      const EdgeInsets.all(7),
+                                                  child: Text(
+                                                    'By: ${items[0].author} , at ${items[0].pubDate.toString().substring(0, 16)}',
+                                                    textAlign: TextAlign.center,
+                                                    style: TextStyle(
+                                                      fontFamily:
+                                                          'Trebuchet MS',
+                                                      fontSize: 13,
+                                                      color: Colors.black,
                                                     ),
                                                   ),
-                                                  Padding(
-                                                    padding: const EdgeInsets.only(
-                                                      left: 8,
-                                                      right: 8,
-                                                    ),
+                                                ),
+                                                Padding(
+                                                  padding:
+                                                      const EdgeInsets.all(7),
+                                                  child: InkWell(
+                                                    onTap: () => null,
                                                     child: Text(
-                                                      '${items[0].title}',
-                                                      textAlign: TextAlign.center,
+                                                      '${items[0].link}',
+                                                      textAlign:
+                                                          TextAlign.center,
                                                       style: TextStyle(
-                                                        fontFamily: 'Trebuchet MS',
-                                                        fontSize: 15,
-                                                        color: Colors.black,
+                                                        fontFamily:
+                                                            'Trebuchet MS',
+                                                        decoration:
+                                                            TextDecoration
+                                                                .underline,
                                                       ),
                                                     ),
                                                   ),
-                                                  Padding(
-                                                    padding: const EdgeInsets.all(7),
-                                                    child: Text(
-                                                      'By: ${items[0].author} , at ${items[0].pubDate.toString().substring(0,16)}',
-                                                      textAlign: TextAlign.center,
-                                                      style: TextStyle(
-                                                        fontFamily: 'Trebuchet MS',
-                                                        fontSize: 13,
-                                                        color: Colors.black,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  Padding(
-                                                    padding: const EdgeInsets.all(7),
-                                                    child: InkWell(
-                                                      onTap: () => null,
-                                                      child: Text(
-                                                        '${items[0].link}',
-                                                        textAlign: TextAlign.center,
-                                                        style: TextStyle(
-                                                          fontFamily: 'Trebuchet MS',
-                                                          decoration: TextDecoration.underline,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  SizedBox(height: 12.0),
-                                                ],
-                                              ),
+                                                ),
+                                                SizedBox(height: 12.0),
+                                              ],
                                             ),
                                           ),
-                                          SizedBox(height: 12.0),
-                                          MaterialButton(
-                                            child: Text(
-                                              'See more',
-                                            ),
-                                            shape: StadiumBorder(),
-                                            textColor: Colors.white,
-                                            color: Colors.lightBlue[700],
-                                            padding: const EdgeInsets.only(
-                                              top: 13,
-                                              bottom: 13,
-                                              right: 30,
-                                              left: 30,
-                                            ),
-                                            onPressed: () => null, // go the new list view
+                                        ),
+                                        SizedBox(height: 12.0),
+                                        MaterialButton(
+                                          child: Text(
+                                            'See more',
                                           ),
-                                          SizedBox(height: 12.0),
-                                        ],
-                                      );
-                                    }
-                                  }else if(snapshot.hasError){
-                                    return Text(
-                                      '${snapshot.error}',
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        fontFamily: 'roboto',
-                                        color: Colors.red,
-                                        fontSize: 20,
-                                      ),
+                                          shape: StadiumBorder(),
+                                          textColor: Colors.white,
+                                          color: Colors.lightBlue[700],
+                                          padding: const EdgeInsets.only(
+                                            top: 13,
+                                            bottom: 13,
+                                            right: 30,
+                                            left: 30,
+                                          ),
+                                          onPressed: () =>
+                                              null, // go the new list view
+                                        ),
+                                        SizedBox(height: 12.0),
+                                      ],
                                     );
                                   }
-
-                                  return Center(
-                                    child: CircularProgressIndicator(),
+                                } else if (snapshot.hasError) {
+                                  return Text(
+                                    '${snapshot.error}',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontFamily: 'roboto',
+                                      color: Colors.red,
+                                      fontSize: 20,
+                                    ),
                                   );
                                 }
-                            ),
-                            FutureBuilder(
-                                future: investingRss.loadFeed('NEWS', 'Forex News'),
-                                builder: (context, snapshot){
 
-                                  if(snapshot.hasData){
-                                    Object obj = snapshot.data!;
-                                    final list = checkType(obj);
+                                return Center(
+                                  child: CircularProgressIndicator(),
+                                );
+                              }),
+                          FutureBuilder(
+                              future:
+                                  investingRss.loadFeed('NEWS', 'Forex News'),
+                              builder: (context, snapshot) {
+                                if (snapshot.hasData) {
+                                  Object obj = snapshot.data!;
+                                  final list = checkType(obj);
 
-                                    if(list is List<InvestingRssNews>){
-                                      List<InvestingRssNews> items = list;
+                                  if (list is List<InvestingRssNews>) {
+                                    List<InvestingRssNews> items = list;
 
-                                      return Column(
-                                          children: [
-                                            Card(
-                                              color: Color(0xffeeeeee),
-                                              borderOnForeground: true,
-                                              child: Container(
-                                                width: width * 0.24,
-                                                child:Column(
-                                                  mainAxisSize: MainAxisSize.min,
-                                                  children: [
-                                                    SizedBox(height: 12),
-                                                    Text(
-                                                      'Forex News',
-                                                      textAlign: TextAlign.center,
-                                                      style: TextStyle(
-                                                        fontFamily: 'Trebuchet MS',
-                                                        fontSize: 20,
-
-                                                      ),
-                                                    ),
-                                                    SizedBox(height: 12.0),
-                                                    Container(
-                                                      width :width * 0.24,
-                                                      height: height * 0.6 * 0.25,
-                                                      decoration: BoxDecoration(
-                                                        image: DecorationImage(
-                                                          image: NetworkImage(items[0].enclosure.url),
-                                                          fit: BoxFit.cover,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    Padding(
-                                                      padding: const EdgeInsets.only(
-                                                        left: 8,
-                                                        right: 8,
-                                                      ),
-                                                      child: Text(
-                                                        '${items[0].title}',
-                                                        textAlign: TextAlign.center,
-                                                        style: TextStyle(
-                                                          fontFamily: 'Trebuchet MS',
-                                                          fontSize: 15,
-                                                          color: Colors.black,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    Padding(
-                                                      padding: const EdgeInsets.all(7),
-                                                      child: Text(
-                                                        'By: ${items[0].author} , at ${items[0].pubDate.toString().substring(0,16)}',
-                                                        textAlign: TextAlign.center,
-                                                        style: TextStyle(
-                                                          fontFamily: 'Trebuchet MS',
-                                                          fontSize: 13,
-                                                          color: Colors.black,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    Padding(
-                                                      padding: const EdgeInsets.all(7),
-                                                      child: InkWell(
-                                                        onTap: () => null,
-                                                        child: Text(
-                                                          '${items[0].link}',
-                                                          textAlign: TextAlign.center,
-                                                          style: TextStyle(
-                                                            fontFamily: 'Trebuchet MS',
-                                                            decoration: TextDecoration.underline,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    SizedBox(height: 12.0),
-                                                  ],
+                                    return Column(children: [
+                                      Card(
+                                        color: Color(0xffeeeeee),
+                                        borderOnForeground: true,
+                                        child: Container(
+                                          width: width * 0.24,
+                                          child: Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              SizedBox(height: 12),
+                                              Text(
+                                                'Forex News',
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(
+                                                  fontFamily: 'Trebuchet MS',
+                                                  fontSize: 20,
                                                 ),
                                               ),
-                                            ),
-                                            SizedBox(height: 12.0),
-                                            MaterialButton(
-                                              child: Text(
-                                                'See more',
-                                              ),
-                                              shape: StadiumBorder(),
-                                              textColor: Colors.white,
-                                              color: Colors.lightBlue[700],
-                                              padding: const EdgeInsets.only(
-                                                top: 13,
-                                                bottom: 13,
-                                                right: 30,
-                                                left: 30,
-                                              ),
-                                              onPressed: () => null, // go the new list view
-                                            ),
-                                            SizedBox(height: 12.0),
-                                          ]
-                                      );
-                                    }
-                                  }else if(snapshot.hasError){
-                                    return Text(
-                                      '${snapshot.error}',
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        fontFamily: 'roboto',
-                                        color: Colors.red,
-                                        fontSize: 20,
-                                      ),
-                                    );
-                                  }
-
-                                  return Center(
-                                    child: CircularProgressIndicator(),
-                                  );
-                                }
-                            ),
-                            FutureBuilder(
-                                future: investingRss.loadFeed('NEWS', 'Coronavirus News & Updates'),
-                                builder: (context, snapshot){
-
-                                  if(snapshot.hasData){
-                                    Object obj = snapshot.data!;
-                                    final list = checkType(obj);
-
-                                    if(list is List<InvestingRssNews>){
-                                      List<InvestingRssNews> items = list;
-
-                                      return Column(
-                                          children: [
-                                            Card(
-                                              color: Color(0xffeeeeee),
-                                              child: Container(
+                                              SizedBox(height: 12.0),
+                                              Container(
                                                 width: width * 0.24,
-                                                child:Column(
-                                                  mainAxisSize: MainAxisSize.min,
-                                                  children: [
-                                                    SizedBox(height: 12),
-                                                    Text(
-                                                      'Coronavirus News & Updates',
-                                                      textAlign: TextAlign.center,
-                                                      style: TextStyle(
-                                                        fontFamily: 'Trebuchet MS',
-                                                        fontSize: 20,
-
-                                                      ),
-                                                    ),
-                                                    SizedBox(height: 12.0),
-                                                    Container(
-                                                      width :width * 0.24,
-                                                      height: height * 0.6 * 0.25,
-                                                      decoration: BoxDecoration(
-                                                        image: DecorationImage(
-                                                          image: NetworkImage(items[0].enclosure.url),
-                                                          fit: BoxFit.cover,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    Padding(
-                                                      padding: const EdgeInsets.only(
-                                                        left: 8,
-                                                        right: 8,
-                                                      ),
-                                                      child: Text(
-                                                        '${items[0].title}',
-                                                        textAlign: TextAlign.center,
-                                                        style: TextStyle(
-                                                          fontFamily: 'Trebuchet MS',
-                                                          fontSize: 15,
-                                                          color: Colors.black,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    Padding(
-                                                      padding: const EdgeInsets.all(7),
-                                                      child: Text(
-                                                        'By: ${items[0].author} , at ${items[0].pubDate.toString().substring(0,16)}',
-                                                        textAlign: TextAlign.center,
-                                                        style: TextStyle(
-                                                          fontFamily: 'Trebuchet MS',
-                                                          fontSize: 13,
-                                                          color: Colors.black,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    Padding(
-                                                      padding: const EdgeInsets.all(7),
-                                                      child: InkWell(
-                                                        onTap: () => null,
-                                                        child: Text(
-                                                          '${items[0].link}',
-                                                          textAlign: TextAlign.center,
-                                                          style: TextStyle(
-                                                            fontFamily: 'Trebuchet MS',
-                                                            decoration: TextDecoration.underline,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    SizedBox(height: 12.0),
-                                                  ],
+                                                height: height * 0.6 * 0.25,
+                                                decoration: BoxDecoration(
+                                                  image: DecorationImage(
+                                                    image: NetworkImage(
+                                                        items[0].enclosure.url),
+                                                    fit: BoxFit.cover,
+                                                  ),
                                                 ),
                                               ),
-                                            ),
-                                            SizedBox(height: 12.0),
-                                            MaterialButton(
-                                              child: Text(
-                                                'See more',
-                                              ),
-                                              shape: StadiumBorder(),
-                                              textColor: Colors.white,
-                                              color: Colors.lightBlue[700],
-                                              padding: const EdgeInsets.only(
-                                                top: 13,
-                                                bottom: 13,
-                                                right: 30,
-                                                left: 30,
-                                              ),
-                                              onPressed: () => null, // go the new list view
-                                            ),
-                                            SizedBox(height: 12.0),
-                                          ]
-                                      );
-                                    }
-                                  }else if(snapshot.hasError){
-                                    return Text(
-                                      '${snapshot.error}',
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        fontFamily: 'roboto',
-                                        color: Colors.red,
-                                        fontSize: 20,
-                                      ),
-                                    );
-                                  }
-
-                                  return Center(
-                                    child: CircularProgressIndicator(),
-                                  );
-                                }
-                            ),
-                            FutureBuilder(
-                                future: investingRss.loadFeed('NEWS', 'Economy News'),
-                                builder: (context, snapshot){
-
-                                  if(snapshot.hasData){
-                                    Object obj = snapshot.data!;
-                                    final list = checkType(obj);
-
-                                    if(list is List<InvestingRssNews>){
-                                      List<InvestingRssNews> items = list;
-
-                                      return Column(
-                                          children: [
-                                            Card(
-                                              color: Color(0xffeeeeee),
-                                              borderOnForeground: true,
-                                              child: Container(
-                                                width: width * 0.24,
-                                                child:Column(
-                                                  mainAxisSize: MainAxisSize.min,
-                                                  children: [
-                                                    SizedBox(height: 12),
-                                                    Text(
-                                                      'Economy News',
-                                                      textAlign: TextAlign.center,
-                                                      style: TextStyle(
-                                                        fontFamily: 'Trebuchet MS',
-                                                        fontSize: 20,
-
-                                                      ),
-                                                    ),
-                                                    SizedBox(height: 12.0),
-                                                    Container(
-                                                      width :width * 0.24,
-                                                      height: height * 0.6 * 0.25,
-                                                      decoration: BoxDecoration(
-                                                        image: DecorationImage(
-                                                          image: NetworkImage(items[0].enclosure.url),
-                                                          fit: BoxFit.cover,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    Padding(
-                                                      padding: const EdgeInsets.only(
-                                                        left: 8,
-                                                        right: 8,
-                                                      ),
-                                                      child: Text(
-                                                        '${items[0].title}',
-                                                        textAlign: TextAlign.center,
-                                                        style: TextStyle(
-                                                          fontFamily: 'Trebuchet MS',
-                                                          fontSize: 15,
-                                                          color: Colors.black,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    Padding(
-                                                      padding: const EdgeInsets.all(7),
-                                                      child: Text(
-                                                        'By: ${items[0].author} , at ${items[0].pubDate.toString().substring(0,16)}',
-                                                        textAlign: TextAlign.center,
-                                                        style: TextStyle(
-                                                          fontFamily: 'Trebuchet MS',
-                                                          fontSize: 13,
-                                                          color: Colors.black,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    Padding(
-                                                      padding: const EdgeInsets.all(7),
-                                                      child: InkWell(
-                                                        onTap: () => null,
-                                                        child: Text(
-                                                          '${items[0].link}',
-                                                          textAlign: TextAlign.center,
-                                                          style: TextStyle(
-                                                            fontFamily: 'Trebuchet MS',
-                                                            decoration: TextDecoration.underline,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    SizedBox(height: 12.0),
-                                                  ],
+                                              Padding(
+                                                padding: const EdgeInsets.only(
+                                                  left: 8,
+                                                  right: 8,
+                                                ),
+                                                child: Text(
+                                                  '${items[0].title}',
+                                                  textAlign: TextAlign.center,
+                                                  style: TextStyle(
+                                                    fontFamily: 'Trebuchet MS',
+                                                    fontSize: 15,
+                                                    color: Colors.black,
+                                                  ),
                                                 ),
                                               ),
-                                            ),
-                                            SizedBox(height: 12),
-                                            MaterialButton(
-                                              child: Text(
-                                                'See more',
+                                              Padding(
+                                                padding:
+                                                    const EdgeInsets.all(7),
+                                                child: Text(
+                                                  'By: ${items[0].author} , at ${items[0].pubDate.toString().substring(0, 16)}',
+                                                  textAlign: TextAlign.center,
+                                                  style: TextStyle(
+                                                    fontFamily: 'Trebuchet MS',
+                                                    fontSize: 13,
+                                                    color: Colors.black,
+                                                  ),
+                                                ),
                                               ),
-                                              shape: StadiumBorder(),
-                                              textColor: Colors.white,
-                                              color: Colors.lightBlue[700],
-                                              padding: const EdgeInsets.only(
-                                                top: 13,
-                                                bottom: 13,
-                                                right: 30,
-                                                left: 30,
+                                              Padding(
+                                                padding:
+                                                    const EdgeInsets.all(7),
+                                                child: InkWell(
+                                                  onTap: () => null,
+                                                  child: Text(
+                                                    '${items[0].link}',
+                                                    textAlign: TextAlign.center,
+                                                    style: TextStyle(
+                                                      fontFamily:
+                                                          'Trebuchet MS',
+                                                      decoration: TextDecoration
+                                                          .underline,
+                                                    ),
+                                                  ),
+                                                ),
                                               ),
-                                              onPressed: () => null, // go the new list view
-                                            ),
-                                            SizedBox(height: 12)
-                                          ]
-                                      );
-                                    }
-                                  }else if(snapshot.hasError){
-                                    return Text(
-                                      '${snapshot.error}',
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        fontFamily: 'roboto',
-                                        color: Colors.red,
-                                        fontSize: 20,
+                                              SizedBox(height: 12.0),
+                                            ],
+                                          ),
+                                        ),
                                       ),
-                                    );
+                                      SizedBox(height: 12.0),
+                                      MaterialButton(
+                                        child: Text(
+                                          'See more',
+                                        ),
+                                        shape: StadiumBorder(),
+                                        textColor: Colors.white,
+                                        color: Colors.lightBlue[700],
+                                        padding: const EdgeInsets.only(
+                                          top: 13,
+                                          bottom: 13,
+                                          right: 30,
+                                          left: 30,
+                                        ),
+                                        onPressed: () =>
+                                            null, // go the new list view
+                                      ),
+                                      SizedBox(height: 12.0),
+                                    ]);
                                   }
-
-                                  return Center(
-                                    child: CircularProgressIndicator(),
+                                } else if (snapshot.hasError) {
+                                  return Text(
+                                    '${snapshot.error}',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontFamily: 'roboto',
+                                      color: Colors.red,
+                                      fontSize: 20,
+                                    ),
                                   );
                                 }
+
+                                return Center(
+                                  child: CircularProgressIndicator(),
+                                );
+                              }),
+                          FutureBuilder(
+                              future: investingRss.loadFeed(
+                                  'NEWS', 'Coronavirus News & Updates'),
+                              builder: (context, snapshot) {
+                                if (snapshot.hasData) {
+                                  Object obj = snapshot.data!;
+                                  final list = checkType(obj);
+
+                                  if (list is List<InvestingRssNews>) {
+                                    List<InvestingRssNews> items = list;
+
+                                    return Column(children: [
+                                      Card(
+                                        color: Color(0xffeeeeee),
+                                        child: Container(
+                                          width: width * 0.24,
+                                          child: Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              SizedBox(height: 12),
+                                              Text(
+                                                'Coronavirus News & Updates',
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(
+                                                  fontFamily: 'Trebuchet MS',
+                                                  fontSize: 20,
+                                                ),
+                                              ),
+                                              SizedBox(height: 12.0),
+                                              Container(
+                                                width: width * 0.24,
+                                                height: height * 0.6 * 0.25,
+                                                decoration: BoxDecoration(
+                                                  image: DecorationImage(
+                                                    image: NetworkImage(
+                                                        items[0].enclosure.url),
+                                                    fit: BoxFit.cover,
+                                                  ),
+                                                ),
+                                              ),
+                                              Padding(
+                                                padding: const EdgeInsets.only(
+                                                  left: 8,
+                                                  right: 8,
+                                                ),
+                                                child: Text(
+                                                  '${items[0].title}',
+                                                  textAlign: TextAlign.center,
+                                                  style: TextStyle(
+                                                    fontFamily: 'Trebuchet MS',
+                                                    fontSize: 15,
+                                                    color: Colors.black,
+                                                  ),
+                                                ),
+                                              ),
+                                              Padding(
+                                                padding:
+                                                    const EdgeInsets.all(7),
+                                                child: Text(
+                                                  'By: ${items[0].author} , at ${items[0].pubDate.toString().substring(0, 16)}',
+                                                  textAlign: TextAlign.center,
+                                                  style: TextStyle(
+                                                    fontFamily: 'Trebuchet MS',
+                                                    fontSize: 13,
+                                                    color: Colors.black,
+                                                  ),
+                                                ),
+                                              ),
+                                              Padding(
+                                                padding:
+                                                    const EdgeInsets.all(7),
+                                                child: InkWell(
+                                                  onTap: () => null,
+                                                  child: Text(
+                                                    '${items[0].link}',
+                                                    textAlign: TextAlign.center,
+                                                    style: TextStyle(
+                                                      fontFamily:
+                                                          'Trebuchet MS',
+                                                      decoration: TextDecoration
+                                                          .underline,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                              SizedBox(height: 12.0),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(height: 12.0),
+                                      MaterialButton(
+                                        child: Text(
+                                          'See more',
+                                        ),
+                                        shape: StadiumBorder(),
+                                        textColor: Colors.white,
+                                        color: Colors.lightBlue[700],
+                                        padding: const EdgeInsets.only(
+                                          top: 13,
+                                          bottom: 13,
+                                          right: 30,
+                                          left: 30,
+                                        ),
+                                        onPressed: () =>
+                                            null, // go the new list view
+                                      ),
+                                      SizedBox(height: 12.0),
+                                    ]);
+                                  }
+                                } else if (snapshot.hasError) {
+                                  return Text(
+                                    '${snapshot.error}',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontFamily: 'roboto',
+                                      color: Colors.red,
+                                      fontSize: 20,
+                                    ),
+                                  );
+                                }
+
+                                return Center(
+                                  child: CircularProgressIndicator(),
+                                );
+                              }),
+                          FutureBuilder(
+                              future:
+                                  investingRss.loadFeed('NEWS', 'Economy News'),
+                              builder: (context, snapshot) {
+                                if (snapshot.hasData) {
+                                  Object obj = snapshot.data!;
+                                  final list = checkType(obj);
+
+                                  if (list is List<InvestingRssNews>) {
+                                    List<InvestingRssNews> items = list;
+
+                                    return Column(children: [
+                                      Card(
+                                        color: Color(0xffeeeeee),
+                                        borderOnForeground: true,
+                                        child: Container(
+                                          width: width * 0.24,
+                                          child: Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              SizedBox(height: 12),
+                                              Text(
+                                                'Economy News',
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(
+                                                  fontFamily: 'Trebuchet MS',
+                                                  fontSize: 20,
+                                                ),
+                                              ),
+                                              SizedBox(height: 12.0),
+                                              Container(
+                                                width: width * 0.24,
+                                                height: height * 0.6 * 0.25,
+                                                decoration: BoxDecoration(
+                                                  image: DecorationImage(
+                                                    image: NetworkImage(
+                                                        items[0].enclosure.url),
+                                                    fit: BoxFit.cover,
+                                                  ),
+                                                ),
+                                              ),
+                                              Padding(
+                                                padding: const EdgeInsets.only(
+                                                  left: 8,
+                                                  right: 8,
+                                                ),
+                                                child: Text(
+                                                  '${items[0].title}',
+                                                  textAlign: TextAlign.center,
+                                                  style: TextStyle(
+                                                    fontFamily: 'Trebuchet MS',
+                                                    fontSize: 15,
+                                                    color: Colors.black,
+                                                  ),
+                                                ),
+                                              ),
+                                              Padding(
+                                                padding:
+                                                    const EdgeInsets.all(7),
+                                                child: Text(
+                                                  'By: ${items[0].author} , at ${items[0].pubDate.toString().substring(0, 16)}',
+                                                  textAlign: TextAlign.center,
+                                                  style: TextStyle(
+                                                    fontFamily: 'Trebuchet MS',
+                                                    fontSize: 13,
+                                                    color: Colors.black,
+                                                  ),
+                                                ),
+                                              ),
+                                              Padding(
+                                                padding:
+                                                    const EdgeInsets.all(7),
+                                                child: InkWell(
+                                                  onTap: () => null,
+                                                  child: Text(
+                                                    '${items[0].link}',
+                                                    textAlign: TextAlign.center,
+                                                    style: TextStyle(
+                                                      fontFamily:
+                                                          'Trebuchet MS',
+                                                      decoration: TextDecoration
+                                                          .underline,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                              SizedBox(height: 12.0),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(height: 12),
+                                      MaterialButton(
+                                        child: Text(
+                                          'See more',
+                                        ),
+                                        shape: StadiumBorder(),
+                                        textColor: Colors.white,
+                                        color: Colors.lightBlue[700],
+                                        padding: const EdgeInsets.only(
+                                          top: 13,
+                                          bottom: 13,
+                                          right: 30,
+                                          left: 30,
+                                        ),
+                                        onPressed: () =>
+                                            null, // go the new list view
+                                      ),
+                                      SizedBox(height: 12)
+                                    ]);
+                                  }
+                                } else if (snapshot.hasError) {
+                                  return Text(
+                                    '${snapshot.error}',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontFamily: 'roboto',
+                                      color: Colors.red,
+                                      fontSize: 20,
+                                    ),
+                                  );
+                                }
+
+                                return Center(
+                                  child: CircularProgressIndicator(),
+                                );
+                              }),
+                        ]),
+                  ]),
+                );
+
+                // contact us
+                contacts = Container(
+                  width: MediaQuery.of(context).size.width * 0.9,
+                  decoration: BoxDecoration(
+                    color: darkTheme ? Colors.black : Colors.white,
+                    borderRadius: BorderRadius.circular(50),
+                    border: Border.all(
+                        color: darkTheme
+                            ? Color(0xFFD1A84E)
+                            : Color.fromRGBO(0, 0, 0, 0.3)),
+                  ),
+                  margin: const EdgeInsets.only(
+                    top: 30,
+                    left: 80,
+                    right: 80,
+                    bottom: 30,
+                  ),
+                  padding: const EdgeInsets.only(
+                    top: 30,
+                    left: 80,
+                    right: 80,
+                    bottom: 30,
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Container(
+                            width: width * 0.3,
+                            height: 70,
+                            margin: const EdgeInsets.all(15.0),
+                            child: TextFormField(
+                              controller: name,
+                              style: TextStyle(
+                                fontFamily: textFont,
+                                color: textColor,
+                              ),
+                              cursorColor: textColor,
+                              keyboardType: TextInputType.text,
+                              decoration: InputDecoration(
+                                hintText: 'Name',
+                                hintStyle: TextStyle(
+                                  fontFamily: textFont,
+                                  color: textColor,
+                                ),
+                                border: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                      width: 1.0,
+                                      color:
+                                          darkTheme ? color : Colors.lightBlue),
+                                  borderRadius: BorderRadius.circular(50.0),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                      width: 1.0,
+                                      color:
+                                          darkTheme ? color : Colors.lightBlue),
+                                  borderRadius: BorderRadius.circular(50.0),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                      width: 2.0,
+                                      color:
+                                          darkTheme ? color : Colors.lightBlue),
+                                  borderRadius: BorderRadius.circular(50.0),
+                                ),
+                              ),
                             ),
-                          ]
+                          ),
+                          Container(
+                            width: width * 0.3,
+                            height: 70,
+                            margin: const EdgeInsets.all(15.0),
+                            child: TextFormField(
+                              controller: email,
+                              style: TextStyle(
+                                fontFamily: textFont,
+                                color: textColor,
+                              ),
+                              cursorColor: textColor,
+                              keyboardType: TextInputType.emailAddress,
+                              decoration: InputDecoration(
+                                hintText: 'Email Address',
+                                hintStyle: TextStyle(
+                                  fontFamily: textFont,
+                                  color: textColor,
+                                ),
+                                border: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                      width: 1.0,
+                                      color:
+                                          darkTheme ? color : Colors.lightBlue),
+                                  borderRadius: BorderRadius.circular(50.0),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                      width: 1.0,
+                                      color:
+                                          darkTheme ? color : Colors.lightBlue),
+                                  borderRadius: BorderRadius.circular(50.0),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                      width: 2.0,
+                                      color:
+                                          darkTheme ? color : Colors.lightBlue),
+                                  borderRadius: BorderRadius.circular(50.0),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ]
-                ),
-              );
+                      Container(
+                        width: width * 0.67,
+                        height: 70,
+                        margin: const EdgeInsets.all(15.0),
+                        child: TextFormField(
+                          controller: message,
+                          style: TextStyle(
+                            fontFamily: textFont,
+                            color: textColor,
+                          ),
+                          cursorColor: textColor,
+                          keyboardType: TextInputType.text,
+                          decoration: InputDecoration(
+                            hintText: 'Message',
+                            hintStyle: TextStyle(
+                              fontFamily: textFont,
+                              color: textColor,
+                            ),
+                            border: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                  width: 1.0,
+                                  color: darkTheme ? color : Colors.lightBlue),
+                              borderRadius: BorderRadius.circular(50.0),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                  width: 1.0,
+                                  color: darkTheme ? color : Colors.lightBlue),
+                              borderRadius: BorderRadius.circular(50.0),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                  width: 2.0,
+                                  color: darkTheme ? color : Colors.lightBlue),
+                              borderRadius: BorderRadius.circular(50.0),
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        height: 25,
+                      ),
+                      MaterialButton(
+                          onPressed: () => displayDialog(
+                              context, 'Attention', 'Coming soon...'),
+                          child: Text(
+                            'Send Message',
+                            style: TextStyle(
+                              fontFamily: textFont,
+                              color: Colors.black,
+                            ),
+                          ),
+                          shape: StadiumBorder(),
+                          color: darkTheme ? color : Colors.lightBlue,
+                          padding: EdgeInsets.all(20.0)),
+                      SizedBox(height: 20.0),
+                    ],
+                  ),
+                );
 
-              // contact us
-              contacts = Container(
-                width: MediaQuery.of(context).size.width,
-                child: Column(
+                //team
+                team = Container(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: width * 0.3,
+                        child: createTeamMemberCard(
+                            context,
+                            teamList[0]['name']!,
+                            teamList[0]['position']!,
+                            teamList[0]['qualification']!,
+                            teamList[0]['image']!),
+                      ),
+                      Container(
+                        width: width * 0.3,
+                        child: createTeamMemberCard(
+                            context,
+                            teamList[2]['name']!,
+                            teamList[2]['position']!,
+                            teamList[2]['qualification']!,
+                            teamList[2]['image']!),
+                      ),
+                      Container(
+                        width: width * 0.3,
+                        child: createTeamMemberCard(
+                            context,
+                            teamList[1]['name']!,
+                            teamList[1]['position']!,
+                            teamList[1]['qualification']!,
+                            teamList[1]['image']!),
+                      ),
+                    ],
+                  ),
+                );
+
+                //philosophy
+                philosophy = Row(
                   mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        Container(
-                          width: width * 0.3,
-                          height: 70,
-                          margin: const EdgeInsets.all(15.0),
-                          child: TextFormField(
-                            controller: name,
-                            style: TextStyle(
-                              fontFamily: 'Trebuchet MS',
-                              color: Colors.black,
-                            ),
-                            cursorColor: Colors.black,
-                            keyboardType: TextInputType.text,
-                            decoration: InputDecoration(
-                              hintText: 'Name',
-                              hintStyle: TextStyle(
-                                fontFamily: 'Trebuchet MS',
-                                color: Colors.black,
-                              ),
-                              border: OutlineInputBorder(
-                                borderSide: BorderSide(width: 1.0, color: Colors.lightBlue),
-                                borderRadius: BorderRadius.circular(50.0),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(width: 1.0, color: Colors.lightBlue),
-                                borderRadius: BorderRadius.circular(50.0),
-                              ),
-                            ),
+                    Container(
+                      width: MediaQuery.of(context).size.width * 0.25,
+                      decoration: BoxDecoration(
+                        color: darkTheme ? color : Colors.lightBlue,
+                        borderRadius: BorderRadius.circular(5.0),
+                        boxShadow: [
+                          BoxShadow(
+                            color: darkTheme
+                                ? Color.fromRGBO(209, 168, 78, 0.5)
+                                : Colors.lightBlue[200]!,
+                            spreadRadius: 5,
+                            blurRadius: 7,
+                            offset: Offset(0, 3),
                           ),
+                        ],
+                      ),
+                      margin: EdgeInsets.all(15.0),
+                      padding: EdgeInsets.all(25),
+                      child: Text(
+                        'We have removed the guess work with our systematic data driven proprietary models for top/down, bottom/up market research.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontFamily: textFont,
+                          color: Colors.black,
+                          fontSize: 25,
                         ),
-                        Container(
-                          width: width * 0.3,
-                          height: 70,
-                          margin: const EdgeInsets.all(15.0),
-                          child: TextFormField(
-                            controller: email,
-                            style: TextStyle(
-                              fontFamily: 'Trebuchet MS',
-                              color: Colors.black,
-                            ),
-                            cursorColor: Colors.black,
-                            keyboardType: TextInputType.emailAddress,
-                            decoration: InputDecoration(
-                              hintText: 'Email Address',
-                              hintStyle: TextStyle(
-                                fontFamily: 'Trebuchet MS',
-                                color: Colors.black,
-                              ),
-                              border: OutlineInputBorder(
-                                borderSide: BorderSide(width: 1.0, color: Colors.lightBlue),
-                                borderRadius: BorderRadius.circular(50.0),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(width: 1.0, color: Colors.lightBlue),
-                                borderRadius: BorderRadius.circular(50.0),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
+                      ),
+                    ),
+                    Icon(
+                      Icons.arrow_forward,
+                      color: darkTheme ? color : Colors.black,
                     ),
                     Container(
-                      width: width * 0.75,
-                      height: 70,
-                      margin: const EdgeInsets.all(15.0),
-                      child: TextFormField(
-                        controller: message,
+                      width: MediaQuery.of(context).size.width * 0.25,
+                      decoration: BoxDecoration(
+                        color: darkTheme ? color : Colors.lightBlue,
+                        borderRadius: BorderRadius.circular(5.0),
+                        boxShadow: [
+                          BoxShadow(
+                            color: darkTheme
+                                ? Color.fromRGBO(209, 168, 78, 0.5)
+                                : Colors.lightBlue[200]!,
+                            spreadRadius: 5,
+                            blurRadius: 7,
+                            offset: Offset(0, 3),
+                          ),
+                        ],
+                      ),
+                      margin: EdgeInsets.all(15.0),
+                      padding: EdgeInsets.all(25),
+                      child: Text(
+                        'Our portfolio construction process emphasizes on wealth preservation through systematic risk quantification and management.',
+                        textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontFamily: 'Trebuchet MS',
+                          fontFamily: textFont,
                           color: Colors.black,
-                        ),
-                        cursorColor: Colors.black,
-                        keyboardType: TextInputType.text,
-                        decoration: InputDecoration(
-                          hintText: 'Message',
-                          hintStyle: TextStyle(
-                            fontFamily: 'Trebuchet MS',
-                            color: Colors.black,
-                          ),
-                          border: OutlineInputBorder(
-                            borderSide: BorderSide(width: 1.0, color: Colors.lightBlue),
-                            borderRadius: BorderRadius.circular(50.0),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(width: 1.0, color: Colors.lightBlue),
-                            borderRadius: BorderRadius.circular(50.0),
-                          ),
+                          fontSize: 25,
                         ),
                       ),
                     ),
-                    SizedBox(height: 25,),
-                    MaterialButton(
-                        onPressed: () => displayDialog(context, 'Attention', 'Coming soon...'),
-                        child: Text('Send Message', style:TextStyle(fontFamily: 'Trebuchet Ms', color: Colors.white,),),
-                        shape: StadiumBorder(),
-                        color: Colors.lightBlue,
-                        padding: EdgeInsets.all(20.0)
+                    Icon(
+                      Icons.arrow_forward,
+                      color: darkTheme ? color : Colors.black,
                     ),
-                    SizedBox(height: 20.0),
+                    Container(
+                      width: MediaQuery.of(context).size.width * 0.25,
+                      decoration: BoxDecoration(
+                        color: darkTheme ? color : Colors.lightBlue,
+                        borderRadius: BorderRadius.circular(5.0),
+                        boxShadow: [
+                          BoxShadow(
+                            color: darkTheme
+                                ? Color.fromRGBO(209, 168, 78, 0.5)
+                                : Colors.lightBlue[200]!,
+                            spreadRadius: 5,
+                            blurRadius: 7,
+                            offset: Offset(0, 3),
+                          ),
+                        ],
+                      ),
+                      margin: EdgeInsets.all(15.0),
+                      padding: EdgeInsets.all(25),
+                      child: Text(
+                        'We keep our investors fully informed monthly about the status of the market, expectation and mitigation measures, especially in the case of irrational market fear.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontFamily: textFont,
+                          color: Colors.black,
+                          fontSize: 25,
+                        ),
+                      ),
+                    ),
                   ],
-                ),
-              );
+                );
 
-
-              /*Row(
+                /*Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -3290,17 +4217,45 @@ class HomePageState extends State<HomePage>{
 
                   ]
               );*/
-            }
+              }
 
-
-            return createBody(context, banner, strategistsTable, strategyFont, mobile, width, height, news, contacts);
-          }
+              return createBody(
+                  context,
+                  banner,
+                  strategistsTable,
+                  strategyFont,
+                  mobile,
+                  width,
+                  height,
+                  news,
+                  contacts,
+                  team,
+                  philosophy,
+                  textColor,
+                  color,
+                  textFont);
+            }),
+          ),
         ),
       ),
     );
   }
 
-  Widget createBody(BuildContext context, Widget banner, Widget table, double strategyFont, bool mobile, double width, double height, Widget news, Widget contacts){
+  Widget createBody(
+      BuildContext context,
+      Widget banner,
+      Widget table,
+      double strategyFont,
+      bool mobile,
+      double width,
+      double height,
+      Widget news,
+      Widget contacts,
+      Widget team,
+      Widget philosophy,
+      Color textColor,
+      Color color,
+      String textFont) {
     return ListView(
       shrinkWrap: true,
       children: [
@@ -3308,9 +4263,9 @@ class HomePageState extends State<HomePage>{
         // art of creating value
         Container(
           decoration: BoxDecoration(
-            color: Colors.lightBlue,
+            color: this.darkTheme ? color : Colors.lightBlue,
           ),
-          width: MediaQuery.of(context).size.width,
+          width: width,
           child: Padding(
             padding: EdgeInsets.only(
               top: 20.0,
@@ -3320,9 +4275,9 @@ class HomePageState extends State<HomePage>{
               '\"Strategy is the art of creating value.\"',
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontFamily: 'Trebuchet MS',
-                color: Colors.white,
-                fontWeight: FontWeight.w700,
+                fontFamily: textFont,
+                color: this.darkTheme ? Colors.black : Colors.white,
+                fontWeight: FontWeight.w600,
                 fontSize: strategyFont,
               ),
             ),
@@ -3336,87 +4291,19 @@ class HomePageState extends State<HomePage>{
             bottom: 25.0,
           ),
           child: Text(
-            'Kua Capital Strategists',
+            'Kua Capital Strategists Returns',
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontFamily: 'Trebuchet MS',
-              color: Colors.black,
-              fontSize: 21,
+              fontFamily: textFont,
+              color: textColor,
+              fontSize: 30,
               fontWeight: FontWeight.bold,
+              decoration: TextDecoration.underline,
             ),
           ),
         ),
         table,
-
-        /*createStrategyCard(context, strategistsList[0]['name'], strategistsList[0]['description'], strategistsList[0]['image'], strategistsList[0]['content']),
-        createStrategyCard(context, strategistsList[1]['name'], strategistsList[1]['description'], strategistsList[1]['image'], strategistsList[1]['content']),
-        createStrategyCard(context, strategistsList[2]['name'], strategistsList[2]['description'], strategistsList[2]['image'], strategistsList[2]['content']),
-        createStrategyCard(context, strategistsList[3]['name'], strategistsList[3]['description'], strategistsList[3]['image'], strategistsList[3]['content']),
-        createStrategyCard(context, strategistsList[4]['name'], strategistsList[4]['description'], strategistsList[4]['image'], strategistsList[4]['content']),
-        createStrategyCard(context, strategistsList[5]['name'], strategistsList[5]['description'], strategistsList[5]['image'], strategistsList[5]['content']),
-        createStrategyCard(context, strategistsList[6]['name'], strategistsList[6]['description'], strategistsList[6]['image'], strategistsList[6]['content']),
-        createStrategyCard(context, strategistsList[7]['name'], strategistsList[7]['description'], '', ''),
-        createStrategyCard(context, strategistsList[8]['name'], strategistsList[7]['description'], '', ''),*/
-
-        // Kua Capital Returns
-        /*Container(
-          width: MediaQuery.of(context).size.width,
-          color: Colors.black12,
-          child: Padding(
-            padding: const EdgeInsets.only(
-              top: 10,
-              bottom: 10,
-              right: 30,
-              left: 30,
-            ),
-            child: Text(
-              'KUA Capital Investments Net Returns  1st March 2020 through 30th March 2021',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontFamily: 'Trebuchet MS',
-                color: Colors.black,
-              ),
-            ),
-          ),
-        ),
-
-        Container(
-          width: MediaQuery.of(context).size.width,
-          height: 200,
-          color: Colors.black12,
-          child: Hero(
-            tag: 'net_returns',
-            child: MaterialButton(
-              onPressed: () => Navigator.push(context, MaterialPageRoute(
-                builder: (context) => Theme(
-                  data: Theme.of(context).copyWith(
-                    scaffoldBackgroundColor: Colors.black,
-                    accentColor: Colors.white,
-                  ),
-                  child: Builder(
-                    builder: (context) => Scaffold(
-                      appBar: AppBar(
-                        title: Text('Net Returns (01/03/2020 - 31/03/2021)', style:TextStyle(fontFamily:'Trebuchet MS',color:Colors.white,fontSize: 12),),
-                        backgroundColor: Colors.black,
-                      ),
-                      body: SafeArea(
-                        child: Hero(
-                          tag: 'net_returns',
-                          child: Container(
-                            width: MediaQuery.of(context).size.width,
-                            height: MediaQuery.of(context).size.height * 0.5,
-                            child: Image.asset('assets/banner/table1.jpg', fit: BoxFit.contain),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              )),
-              child: Image.asset('assets/banner/table1.jpg', fit: BoxFit.contain,height:MediaQuery.of(context).size.height),
-            ),
-          ),
-        ),*/
+        SizedBox(height: 15),
 
         // opportunities come infrequently
         Container(
@@ -3426,8 +4313,8 @@ class HomePageState extends State<HomePage>{
             '\"Opportunities come infrequently. When it rains gold, put out the bucket, not the thimble\" \n~Warren Buffet',
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontFamily: 'Trebuchet MS',
-              color: Colors.blueGrey,
+              fontFamily: textFont,
+              color: Colors.black,
               fontWeight: FontWeight.bold,
               fontSize: mobile ? 15 : 25,
             ),
@@ -3436,133 +4323,97 @@ class HomePageState extends State<HomePage>{
         ),
 
         // Investment Philosophy and Process
-        /*Container(
+        Container(
           width: MediaQuery.of(context).size.width,
-          padding: const EdgeInsets.all(12.0),
           child: Text(
             'Investment Philosophy and Process',
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontFamily: 'Trebuchet MS',
-              color: Colors.black,
+              fontFamily: textFont,
+              color: this.darkTheme ? color : Colors.black,
               fontWeight: FontWeight.w700,
-              fontSize: 35,
+              fontSize: 30,
+              decoration: TextDecoration.underline,
             ),
           ),
         ),
-
         Container(
-          width: MediaQuery.of(context).size.width * 0.7,
-          decoration: BoxDecoration(
-            color: Colors.lightBlue,
-            borderRadius: BorderRadius.circular(5.0),
-          ),
-          margin: EdgeInsets.all(12.0),
-          padding: EdgeInsets.only(
-            top: 12.0,
-            bottom: 12.0,
-          ),
-          child: Text(
-            'We have removed the guess work with our systematic data driven proprietary models for top/down, bottom/up market research.',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontFamily: 'Trebuchet MS',
-              color: Colors.white,
+          width: width,
+          child: Padding(
+            padding: EdgeInsets.only(
+              bottom: 20.0,
+            ),
+            child: Text(
+              'You must add value to yourself to be relevant.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontFamily: textFont,
+                color: this.darkTheme ? color : Colors.black,
+                fontSize: 19,
+              ),
             ),
           ),
         ),
-
-        Icon(Icons.arrow_downward, color: Colors.black,),
-
-        Container(
-          width: MediaQuery.of(context).size.width * 0.7,
-          decoration: BoxDecoration(
-            color: Colors.lightBlue,
-            borderRadius: BorderRadius.circular(5.0),
-          ),
-          margin: EdgeInsets.all(12.0),
-          padding: EdgeInsets.only(
-            top: 12.0,
-            bottom: 12.0,
-          ),
-          child: Text(
-            'Our portfolio construction process emphasizes on wealth preservation through systematic risk quantification and management.',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontFamily: 'Trebuchet MS',
-              color: Colors.white,
-            ),
-          ),
+        SizedBox(
+          height: 20,
         ),
-
-        Icon(Icons.arrow_downward, color: Colors.black,),
-
-        Container(
-          width: MediaQuery.of(context).size.width * 0.7,
-          decoration: BoxDecoration(
-            color: Colors.lightBlue,
-            borderRadius: BorderRadius.circular(5.0),
-          ),
-          margin: EdgeInsets.all(12.0),
-          padding: EdgeInsets.only(
-            top: 12.0,
-            bottom: 12.0,
-          ),
-          child: Text(
-            'We keep our investors fully informed monthly about the status of the market, expectation and mitigation measures, especially in the case of irrational market fear.',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontFamily: 'Trebuchet MS',
-              color: Colors.white,
-            ),
-          ),
-        ),*/
+        philosophy,
 
         // Our Team
-        /*Container(
-          width: width * 0.75,
-          padding: EdgeInsets.all(12.0),
-          child: Text(
-            'Our Team',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontFamily: 'Trebuchet MS',
-              color: Colors.black,
-              fontWeight: FontWeight.w800,
-              fontSize: 38,
+        Container(
+            width: width * 0.75,
+            child: Text(
+              'Our Team',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontFamily: textFont,
+                color: this.darkTheme ? color : Colors.black,
+                fontWeight: FontWeight.w800,
+                fontSize: 30,
+                decoration: TextDecoration.underline,
+              ),
+            )),
+        Container(
+          width: width,
+          child: Padding(
+            padding: EdgeInsets.only(
+              bottom: 20.0,
             ),
-          )
+            child: Text(
+              'Driven by the pursuit for growth.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontFamily: textFont,
+                color: this.darkTheme ? color : Colors.black,
+                fontSize: 19,
+              ),
+            ),
+          ),
         ),
-
-        createTeamMemberCard(context, teamList[0]['name'], teamList[0]['position'], teamList[0]['qualification'], teamList[0]['image']),
-        createTeamMemberCard(context, teamList[2]['name'], teamList[2]['position'], teamList[2]['qualification'], teamList[2]['image']),
-        createTeamMemberCard(context, teamList[1]['name'], teamList[1]['position'], teamList[1]['qualification'], teamList[1]['image']),*/
+        SizedBox(
+          height: 20,
+        ),
+        team,
 
         // news headlines, One from each out of six
-        Padding(
+        /*Padding(
           padding: const EdgeInsets.all(12),
           child: Text(
             'News Updates',
             textAlign: TextAlign.center,
             style: TextStyle(
               fontFamily: 'Trebuchet MS',
-              color: Colors.blueGrey,
+              color: Colors.black,
               fontWeight: FontWeight.bold,
               fontSize: 30,
             ),
           ),
         ),
-        news,
+        news,*/
 
         // see more news update
-        SizedBox(height: 15.0),
+        /*SizedBox(height: 15.0),
         Container(
-          padding: const EdgeInsets.only(
-            top: 12,
-            bottom: 12,
-            left: 30,
-            right: 30,
-          ),
           color: Color(0xffeeeeee),
           child: InkWell(
             onTap: () => null,
@@ -3582,7 +4433,7 @@ class HomePageState extends State<HomePage>{
               ),
             ),
           ),
-        ),
+        ),*/
 
         // contact us definitions
         Container(
@@ -3593,187 +4444,152 @@ class HomePageState extends State<HomePage>{
               'Contact Us',
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontFamily: 'Trebuchet MS',
-                color: Colors.blueGrey,
+                fontFamily: textFont,
+                color: this.darkTheme ? color : Colors.black,
                 fontWeight: FontWeight.w700,
-                fontSize: 50,
+                fontSize: 35,
+                decoration: TextDecoration.underline,
               ),
-            )
+            ),
+            subtitle: Text(
+              'Have a Question ?',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontFamily: textFont,
+                color: this.darkTheme ? color : Colors.black,
+                fontSize: 19,
+              ),
+            ),
           ),
         ),
-
         contacts,
-
       ],
     );
   }
 
   // check the type of list for investing news and analysis
-  checkType(Object data){
-    if(data is List<InvestingRssNews>){
+  checkType(Object data) {
+    if (data is List<InvestingRssNews>) {
       return List<InvestingRssNews>.from(data);
-    }else if(data is List<InvestingRssAnalysis>){
+    } else if (data is List<InvestingRssAnalysis>) {
       return List<InvestingRssAnalysis>.from(data);
     }
   }
 
   // build news listView
   Widget _buildNewsListView(context, List<InvestingRssNews> data) {
-
-    return ListView(
-      shrinkWrap: true,
-      children: [
-        Container(
-          width: MediaQuery.of(context).size.width,
-          child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 30,
-                  height: 30,
-                  child: Image.network(data[0].enclosure.url, width: 30, height: 30),
-                ),
-                Text(data[0].title),
-                Text('${data[0].pubDate}'),
-                Text(data[0].author),
-                Text(data[0].link)
-              ]
+    return ListView(shrinkWrap: true, children: [
+      Container(
+        width: MediaQuery.of(context).size.width,
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          Container(
+            width: 30,
+            height: 30,
+            child: Image.network(data[0].enclosure.url, width: 30, height: 30),
           ),
-        ),
-      ]
-    );
+          Text(data[0].title),
+          Text('${data[0].pubDate}'),
+          Text(data[0].author),
+          Text(data[0].link)
+        ]),
+      ),
+    ]);
   }
 
-  /*Widget createStrategyCard(BuildContext context, String name, String description, String image, String content){
-    return Container(
-      child: Card(
-        child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            mainAxisSize:MainAxisSize.min,
-            children: [
-              SizedBox(height: 12.0),
-              Container(
-                child: Text(
-                  name,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontFamily: 'Trebuchet MS',
-                    fontWeight: FontWeight.w700,
-                    fontSize: 19,
-                  ),
-                ),
-              ),
-              SizedBox(height: 12.0),
-              image != null ? Container(
-                width: MediaQuery.of(context).size.width * 0.95,
-                height: 220,
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage(image),
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              ) : Container(),
-              Padding(
-                padding: EdgeInsets.only(
-                  top: 5,
-                  left: 7,
-                ),
-                child: Text(
-                  description,
-                  textAlign: TextAlign.left,
-                  style: TextStyle(
-                    fontFamily: 'Trebuchet MS',
-                    color: Colors.black,
-                    fontSize: 18,
-                  ),
-                ),
-              ),
-              SizedBox(height: 13.0),
-              image != null ?MaterialButton(
-                onPressed: () => displayDialog(context, name, content),
-                child: Text('Learn More', style: TextStyle(fontFamily: 'Trebuchet MS',),),
-                textColor: Color(0xffffffff),
-                color: Colors.lightBlue,
-                shape: StadiumBorder(),
-                elevation: 5,
-                padding: const EdgeInsets.only(
-                  top: 15.0,
-                  bottom: 15.0,
-                  right: 30.0,
-                  left: 30.0,
-                ),
-              ) : Container(),
-              image != null ? SizedBox(height: 15.0,) : Container(),
-            ]
-        ),
-      ),
-    );
-  }*/
-
-  Widget createTeamMemberCard(BuildContext context, String name, String position, String qualification, String image){
+  Widget createTeamMemberCard(BuildContext context, String name,
+      String position, String qualification, String image) {
     return Card(
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          SizedBox(height: 20.0),
-          GestureDetector(
-            onTap: () => Navigator.push(context, MaterialPageRoute(
-              builder: (context) => Theme(
-                data: Theme.of(context).copyWith(
-                  scaffoldBackgroundColor: Colors.white,
-                  accentColor: Colors.white,
-                ),
-                child: Builder(
-                  builder: (context) => Scaffold(
-                    appBar: AppBar(
-                      title: Text(name, style: TextStyle(fontFamily:'Trebuchet MS'),),
-                      backgroundColor: Colors.black,
-                    ),
-                    body: SafeArea(
-                      child: Center(
-                        child: Hero(
-                          tag: name+'profile_image',
-                          child: Container(
-                            width: MediaQuery.of(context).size.width,
-                            height: MediaQuery.of(context).size.height * 0.5,
-                            child: Image.asset(image, height: 100),
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(height: 20.0),
+            GestureDetector(
+              onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => Theme(
+                      data: Theme.of(context).copyWith(
+                        scaffoldBackgroundColor: Colors.white,
+                        accentColor: Colors.white,
+                      ),
+                      child: Builder(
+                        builder: (context) => Scaffold(
+                          appBar: AppBar(
+                            title: Text(
+                              name,
+                              style: TextStyle(fontFamily: 'Trebuchet MS'),
+                            ),
+                            backgroundColor: Colors.black,
+                          ),
+                          body: SafeArea(
+                            child: Center(
+                              child: Hero(
+                                tag: name + 'profile_image',
+                                child: Container(
+                                  width: MediaQuery.of(context).size.width,
+                                  height:
+                                      MediaQuery.of(context).size.height * 0.5,
+                                  child: Image.asset(image, height: 100),
+                                ),
+                              ),
+                            ),
                           ),
                         ),
                       ),
                     ),
+                  )),
+              child: Container(
+                width: MediaQuery.of(context).size.width * 0.3,
+                height: 120,
+                child: Hero(
+                  tag: name + 'profile_image',
+                  child: Image.asset(
+                    image,
+                    fit: BoxFit.contain,
                   ),
                 ),
               ),
-            )),
-            child: Hero(
-              tag: name+'profile_image',
-              child: Image.asset(image, fit: BoxFit.contain,),
             ),
-          ),
-          SizedBox(height: 7.0),
-          ListTile(
-            title: Text(name,style:TextStyle(fontFamily: 'Trebuchet MS'),),
-            subtitle: Text('Name', style:TextStyle(fontFamily: 'Trebuchet MS',fontWeight: FontWeight.w300) ,),
-          ),
-          ListTile(
-            title: Text(position,style:TextStyle(fontFamily: 'Trebuchet MS'),),
-            subtitle: Text('Position', style:TextStyle(fontFamily: 'Trebuchet MS',fontWeight: FontWeight.w300) ,),
-          ),
-        ]
-      ),
+            SizedBox(height: 7.0),
+            ListTile(
+              title: Text(
+                name,
+                style: TextStyle(fontFamily: 'Trebuchet MS'),
+              ),
+              subtitle: Text(
+                'Name',
+                style: TextStyle(
+                    fontFamily: 'Trebuchet MS', fontWeight: FontWeight.w300),
+              ),
+            ),
+            ListTile(
+              title: Text(
+                position,
+                style: TextStyle(fontFamily: 'Trebuchet MS'),
+              ),
+              subtitle: Text(
+                'Position',
+                style: TextStyle(
+                    fontFamily: 'Trebuchet MS', fontWeight: FontWeight.w300),
+              ),
+            ),
+          ]),
     );
   }
 
-  Future displayDialog(BuildContext context, String name, String content){
+  Future displayDialog(BuildContext context, String name, String content) {
     return showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(name, textAlign: TextAlign.center, style: TextStyle(fontFamily: 'Trebuchet MS', color: Colors.black, fontWeight: FontWeight.bold)),
-        content: SingleChildScrollView(
-          child: Text(content)
-        ),
+        title: Text(name,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+                fontFamily: 'Trebuchet MS',
+                color: Colors.black,
+                fontWeight: FontWeight.bold)),
+        content: SingleChildScrollView(child: Text(content)),
         actions: [
           MaterialButton(
             child: Text('Close'),
